@@ -3,98 +3,90 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 
+interface Artist {
+   name: string;
+   playcount: number;
+   aliases: string[];
+}
+
 export default function Home() {
-   const [artistCounts, setArtistCounts] = useState<Record<string, number>>({});
+   const [artists, setArtists] = useState<Artist[]>([]);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
 
-   const API_KEY = process.env.NEXT_PUBLIC_LASTFM_API_KEY;
-   const USERNAME = process.env.NEXT_PUBLIC_LASTFM_USERNAME;
-
    useEffect(() => {
-      if (!API_KEY || !USERNAME) {
-         setError("Missing Last.fm API credentials");
-         setLoading(false);
-         return;
-      }
-
-      const fetchData = async () => {
+      const fetchArtists = async () => {
          try {
-            // load local alias JSON
-            // const aliasRes = await fetch("/artistGroups.json");
+            const username = process.env.NEXT_PUBLIC_LASTFM_USERNAME!;
+            const apiKey = process.env.NEXT_PUBLIC_LASTFM_API_KEY!;
 
-            // const aliasMap = aliasRes.ok ? await aliasRes.json() : {};
+            // 1️⃣ Fetch Last.fm artists
+            const lastFmRes = await fetch(
+               `https://ws.audioscrobbler.com/2.0/?method=library.getartists&user=${username}&api_key=${apiKey}&format=json`
+            );
+            if (!lastFmRes.ok)
+               throw new Error("Failed to fetch Last.fm artists");
+            const lastFmData = await lastFmRes.json();
 
+            console.log(lastFmData.artists.artist.type);
+
+            const lastFmArtists: Artist[] = lastFmData.artists.artist.map(
+               (a: any) => ({
+                  name: a.name,
+                  playcount: parseInt(a.playcount),
+                  aliases: [],
+               })
+            );
+
+            // 2️⃣ Fetch aliases from your database (object with keys = artist names)
             const aliasRes = await fetch("/api/aliases");
-            const aliasMap = aliasRes.ok ? await aliasRes.json() : {};
+            if (!aliasRes.ok) throw new Error("Failed to fetch aliases");
+            const aliasList: Record<string, string[]> = await aliasRes.json();
+            console.log("aliasList:", aliasList);
 
-            // fetch all-time top artists
-            const res = await fetch(
-               `https://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user=${USERNAME}&api_key=${API_KEY}&format=json&limit=1000`
+            // 3️⃣ Merge playcounts using canonical names
+            const combinedCounts: Record<string, number> = {};
+
+            lastFmArtists.forEach((artist) => {
+               // Find canonical name: either the artist key itself or the key where this artist appears as an alias
+               const canonicalName =
+                  Object.keys(aliasList).find(
+                     (key) =>
+                        key === artist.name ||
+                        aliasList[key].includes(artist.name)
+                  ) || artist.name;
+
+               // Add playcount to the canonical name
+               combinedCounts[canonicalName] =
+                  (combinedCounts[canonicalName] || 0) + artist.playcount;
+            });
+
+            // 4️⃣ Convert combinedCounts back into array for rendering
+            const mergedArtists: Artist[] = Object.entries(combinedCounts).map(
+               ([name, playcount]) => ({
+                  name,
+                  playcount,
+                  aliases: aliasList[name] || [],
+               })
             );
 
-            if (!res.ok) throw new Error("Failed to fetch Last.fm data");
-
-            const json = await res.json();
-            const artists = json.topartists?.artist || [];
-
-            if (!Array.isArray(artists))
-               throw new Error("Unexpected Last.fm response format");
-
-            // Step 1: Build raw counts
-            const rawCounts = artists.reduce(
-               (acc: Record<string, number>, a: any) => {
-                  const name = a.name || "Unknown Artist";
-                  const playcount = Number(a.playcount) || 0;
-                  acc[name] = playcount;
-                  return acc;
-               },
-               {}
-            );
-
-            // Step 2: Merge according to aliasMap
-            const mergedCounts: Record<string, number> = {};
-
-            for (const [mainName, aliases] of Object.entries(aliasMap)) {
-               let total = 0;
-
-               // add main name if exists
-               if (rawCounts[mainName]) total += rawCounts[mainName];
-
-               // add all aliases
-               for (const alias of aliases as string[]) {
-                  if (rawCounts[alias]) total += rawCounts[alias];
-               }
-
-               if (total > 0) mergedCounts[mainName] = total;
-            }
-
-            // include any leftover artists not in alias map
-            for (const [artist, count] of Object.entries(rawCounts)) {
-               const isGrouped = Object.values(aliasMap).some((aliases) =>
-                  (aliases as string[]).includes(artist)
-               );
-               const isMain = Object.keys(aliasMap).includes(artist);
-               if (!isGrouped && !isMain) mergedCounts[artist] = count;
-            }
-
-            setArtistCounts(mergedCounts);
+            setArtists(mergedArtists);
          } catch (err: any) {
-            console.error("Error loading Last.fm data:", err);
+            console.error(err);
             setError(err.message);
          } finally {
             setLoading(false);
          }
       };
 
-      fetchData();
-   }, [API_KEY, USERNAME]);
+      fetchArtists();
+   }, []);
 
    if (loading)
       return (
          <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
             <p className="text-zinc-700 dark:text-zinc-300">
-               Loading your Last.fm top artists…
+               Loading your artists…
             </p>
          </div>
       );
@@ -106,9 +98,7 @@ export default function Home() {
          </div>
       );
 
-   const sortedArtists = Object.entries(artistCounts).sort(
-      (a, b) => b[1] - a[1]
-   );
+   const sortedArtists = artists.sort((a, b) => b.playcount - a.playcount);
 
    return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -123,23 +113,23 @@ export default function Home() {
             />
 
             <h1 className="text-3xl font-semibold text-black dark:text-zinc-50 mb-2">
-               🎧 {USERNAME}&apos;s All-Time Top Artists
+               🎧 All-Time Top Artists
             </h1>
             <p className="text-zinc-600 dark:text-zinc-400 mb-8">
-               Grouped by aliases (e.g. Utada Hikaru = 宇多田ヒカル)
+               Grouped by aliases
             </p>
 
             <div className="flex flex-col gap-4 w-full">
-               {sortedArtists.map(([artist, count]) => (
+               {sortedArtists.map(({ name, playcount }) => (
                   <div
-                     key={artist}
+                     key={name}
                      className="flex justify-between items-center rounded-xl border border-zinc-200 dark:border-zinc-700 p-4 shadow-sm hover:shadow-md transition-all"
                   >
                      <span className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                        {artist}
+                        {name}
                      </span>
                      <span className="text-zinc-600 dark:text-zinc-400">
-                        {count.toLocaleString()} listens
+                        {playcount.toLocaleString()} listens
                      </span>
                   </div>
                ))}

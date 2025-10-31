@@ -1,8 +1,9 @@
 import { PrismaClient } from "@prisma/client";
+
 const prisma = new PrismaClient();
 
 async function main() {
-   const data = {
+   const data: Record<string, string[]> = {
       "Utada Hikaru": ["宇多田ヒカル", "Hikaru Utada"],
       林憶蓮: ["Sandy Lam", "Lam Yik Lin"],
       ヨルシカ: ["Yorushika"],
@@ -15,15 +16,26 @@ async function main() {
    };
 
    for (const [artist, aliases] of Object.entries(data)) {
-      await prisma.artist.create({
-         data: {
-            name: artist,
-            aliases: {
-               create: aliases.map((a) => ({ name: a })),
+      try {
+         await prisma.artist.create({
+            data: {
+               name: artist,
+               aliases: {
+                  create: aliases.map((a) => ({ name: a })),
+               },
             },
-         },
-      });
+         });
+         console.log(`Inserted artist: ${artist}`);
+      } catch (err) {
+         console.error(`Failed to insert ${artist}:`, err);
+      }
    }
 }
 
-main().finally(() => prisma.$disconnect());
+main()
+   .catch((err) => {
+      console.error("Seeding failed:", err);
+   })
+   .finally(async () => {
+      await prisma.$disconnect();
+   });

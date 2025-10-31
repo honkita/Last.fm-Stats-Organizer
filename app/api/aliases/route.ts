@@ -1,17 +1,25 @@
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+// app/api/artists/route.ts
+import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
 export async function GET() {
-   const artists = await prisma.artist.findMany({
-      include: { aliases: true },
-   });
+   try {
+      const artists = await prisma.artist.findMany({
+         include: { aliases: true },
+      });
 
-   // Convert to the same format as your old JSON
-   const aliasMap: Record<string, string[]> = {};
-   for (const a of artists) {
-      aliasMap[a.name] = a.aliases.map((alias) => alias.name);
+      // Convert to a map: artist name -> array of alias names
+      const aliasMap: Record<string, string[]> = {};
+      for (const artist of artists) {
+         aliasMap[artist.name] = artist.aliases.map((alias) => alias.name);
+      }
+
+      return NextResponse.json(aliasMap);
+   } catch (err) {
+      console.error("Prisma fetch error:", err);
+      return NextResponse.json(
+         { error: "Failed to fetch artists" },
+         { status: 500 }
+      );
    }
-
-   return Response.json(aliasMap);
 }

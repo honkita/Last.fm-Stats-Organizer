@@ -3,6 +3,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,8 +15,8 @@ model Artist {
 }
 
 model Alias {
-  id       Int     @id @default(autoincrement())
-  name     String  @unique
-  artist   Artist  @relation(fields: [artistId], references: [id])
+  id       Int    @id @default(autoincrement())
+  name     String @unique
   artistId Int
+  artist   Artist @relation(fields: [artistId], references: [id])
 }
