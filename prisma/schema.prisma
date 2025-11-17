@@ -10,25 +10,18 @@ datasource db {
 model Artist {
   id             Int             @id @default(autoincrement())
   name           String          @unique
-  aliases        Alias[]
+  aliases        Json?
   IgnoreGrouping IgnoreGrouping?
-}
-
-model Alias {
-  id       Int    @id @default(autoincrement())
-  name     String @unique
-  artistId Int
-  artist   Artist @relation(fields: [artistId], references: [id])
 }
 
 model IgnoreCanonicalization {
   id   Int    @id @unique @default(autoincrement())
-  name String @unique(map: "IgnoreCanonicalization_name_key")
+  name String @unique(map: "IgnoreCanonicalization_artistName_key")
 }
 
 model IgnoreGrouping {
   id       Int     @id @default(autoincrement())
-  name     String  @unique(map: "IgnoreGrouping_name_key")
+  name     String  @unique
   artistId Int?    @unique
   artist   Artist? @relation(fields: [artistId], references: [id])
 }
