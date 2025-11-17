@@ -1,10 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
-// Canonicalization function — keeps non-Latin letters intact
-function canonicalizeName(name: string) {
-   return name;
-}
+import * as OpenCC from "opencc-js";
+import { canonicalizeName } from "@/utils/canonicalizeName"; // your library
 
 const API_KEY = process.env.NEXT_PUBLIC_LASTFM_API_KEY!;
 const USERNAME = process.env.NEXT_PUBLIC_LASTFM_USERNAME!;
@@ -24,7 +21,7 @@ async function fetchAllLastFmArtists(username: string, apiKey: string) {
       const data = await res.json();
 
       allArtists.push(...data.topartists.artist);
-      totalPages = parseInt(data.topartists["@attr"].totalPages);
+      totalPages = parseInt(data.topartists["@attr"].totalPages, 10);
       page++;
    }
 
@@ -34,23 +31,22 @@ async function fetchAllLastFmArtists(username: string, apiKey: string) {
 export async function GET() {
    try {
       // 1️⃣ Fetch Last.fm artists
-      const lastFmArtists: any[] = await fetchAllLastFmArtists(
-         USERNAME,
-         API_KEY
-      );
+      const lastFmArtists = await fetchAllLastFmArtists(USERNAME, API_KEY);
 
       // 2️⃣ Fetch DB artists
       const dbArtists = await prisma.artist.findMany();
 
-      // 3️⃣ Build explicit alias → main name map
+      // 3️⃣ Build alias → main name map
       const aliasMap: Record<string, string> = {};
+
       dbArtists.forEach((artist) => {
          const mainCanon = canonicalizeName(artist.name);
          aliasMap[mainCanon] = artist.name;
 
          const aliases: string[] = Array.isArray(artist.aliases)
             ? artist.aliases
-            : [];
+            : JSON.parse(artist.aliases || "[]"); // parse JSONB if returned as string
+
          aliases.forEach((alias) => {
             const canonAlias = canonicalizeName(alias);
             aliasMap[canonAlias] = artist.name;
@@ -59,13 +55,14 @@ export async function GET() {
 
       // 4️⃣ Merge Last.fm counts
       const combinedCounts: Record<string, number> = {};
+
       lastFmArtists.forEach((artist) => {
          const canonName = canonicalizeName(artist.name);
 
-         // 4a: Try exact alias match first
+         // 4a: Exact alias match
          let mainName = aliasMap[canonName];
 
-         // 4b: Fallback substring grouping if no alias match
+         // 4b: Substring fallback for tricky groupings like i-dle
          if (!mainName) {
             mainName = Object.keys(aliasMap).find(
                (dbCanon) =>
@@ -83,8 +80,10 @@ export async function GET() {
       const result = Object.entries(combinedCounts).map(([name, playcount]) => {
          const dbEntry = dbArtists.find((a) => a.name === name);
          const aliases: string[] =
-            dbEntry && Array.isArray(dbEntry.aliases)
-               ? (dbEntry.aliases as string[])
+            dbEntry && dbEntry.aliases
+               ? Array.isArray(dbEntry.aliases)
+                  ? dbEntry.aliases
+                  : JSON.parse(dbEntry.aliases)
                : [];
          return { name, playcount, aliases };
       });
