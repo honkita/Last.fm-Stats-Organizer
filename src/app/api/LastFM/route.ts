@@ -574,7 +574,7 @@ const getBestAlbum = async (
  */
 const GET = async (req: Request) => {
    const { searchParams } = new URL(req.url);
-   const USERNAME = searchParams.get("user");
+   const USERNAME = searchParams.get("user") || "";
    try {
       // Fetch DB Artists
       const [dbArtistAlbums, dbSameNames] = await Promise.all([
