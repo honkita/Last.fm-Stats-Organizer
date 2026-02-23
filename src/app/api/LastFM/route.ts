@@ -26,7 +26,6 @@ import type {
 
 // Environment Variables
 const API_KEY = process.env.NEXT_PUBLIC_LASTFM_API_KEY!;
-const USERNAME = process.env.NEXT_PUBLIC_LASTFM_USERNAME!;
 const API_URL = "https://ws.audioscrobbler.com/2.0/";
 
 // TEMPORARY FIX FOR SOME ARTISTS (FUCKING LAST.FM)
@@ -573,7 +572,9 @@ const getBestAlbum = async (
  * GET Handler
  * @returns NextResponse
  */
-const GET = async () => {
+const GET = async (req: Request) => {
+   const { searchParams } = new URL(req.url);
+   const USERNAME = searchParams.get("user");
    try {
       // Fetch DB Artists
       const [dbArtistAlbums, dbSameNames] = await Promise.all([

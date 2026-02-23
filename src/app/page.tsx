@@ -20,28 +20,40 @@ interface ApiResponse {
 }
 
 export default function Home() {
+   const [username, setUsername] = useState("");
+   const [submittedUser, setSubmittedUser] = useState<string | null>(null);
+
    const [artists, setArtists] = useState<Record<string, ArtistData>>({});
-   const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(false);
    const [error, setError] = useState<string | null>(null);
 
-   useEffect(() => {
-      const fetchArtists = async () => {
-         try {
-            const res = await fetch("/api/LastFM");
-            if (!res.ok) throw new Error("Failed to fetch artists");
+   const fetchArtists = async (user: string) => {
+      try {
+         setLoading(true);
+         setError(null);
 
-            const data: ApiResponse = await res.json();
-            setArtists(data["All Data"]);
-         } catch (err: unknown) {
-            if (err instanceof Error) setError(err.message);
-            else setError("An unknown error occurred");
-         } finally {
-            setLoading(false);
-         }
-      };
+         const res = await fetch(
+            `/api/LastFM?user=${encodeURIComponent(user)}`,
+         );
+         if (!res.ok) throw new Error("Failed to fetch artists");
 
-      fetchArtists();
-   }, []);
+         const data: ApiResponse = await res.json();
+         setArtists(data["All Data"]);
+      } catch (err: unknown) {
+         if (err instanceof Error) setError(err.message);
+         else setError("An unknown error occurred");
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   const handleSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!username.trim()) return;
+
+      setSubmittedUser(username.trim());
+      fetchArtists(username.trim());
+   };
 
    const sortedArtists = useMemo(() => {
       return Object.entries(artists).sort(
@@ -49,77 +61,100 @@ export default function Home() {
       );
    }, [artists]);
 
-   if (loading)
-      return (
-         <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-            <p className="text-zinc-700 dark:text-zinc-300">
-               Loading your artists…
-            </p>
-         </div>
-      );
-
-   if (error)
-      return (
-         <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-            <p className="text-red-600 dark:text-red-400">⚠️ {error}</p>
-         </div>
-      );
-
    return (
       <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black">
          <main className="w-full max-w-3xl py-20 px-8 bg-white dark:bg-zinc-900">
-            <h1 className="text-3xl font-semibold text-black dark:text-zinc-50 mb-2">
-               🎧 All-Time Top Artists ({sortedArtists.length})
+            {/* Header */}
+            <h1 className="text-3xl font-semibold text-black dark:text-zinc-50 mb-6">
+               🎧 Last.fm Album Stats
             </h1>
 
-            <p className="text-zinc-600 dark:text-zinc-400 mb-8">
-               Artist name, total listens, and number of albums listened.
-            </p>
+            {/* Username Form */}
+            <form onSubmit={handleSubmit} className="flex gap-3 mb-8">
+               <input
+                  type="text"
+                  placeholder="Enter Last.fm username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="flex-1 px-4 py-2 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-black dark:text-zinc-100"
+               />
+               <button
+                  type="submit"
+                  className="px-5 py-2 rounded-lg bg-black text-white dark:bg-zinc-100 dark:text-black hover:opacity-90 transition"
+               >
+                  Load
+               </button>
+            </form>
 
-            <div className="flex flex-col gap-4 w-full">
-               {sortedArtists.map(([name, artist]) => {
-                  const albumEntries = Object.entries(artist.albums);
-                  const albumCount = albumEntries.length;
+            {/* Loading */}
+            {loading && (
+               <p className="text-zinc-600 dark:text-zinc-400">
+                  Loading data for {submittedUser}…
+               </p>
+            )}
 
-                  return (
-                     <details
-                        key={name}
-                        className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-4 shadow-sm hover:shadow-md transition-all"
-                     >
-                        <summary className="cursor-pointer flex justify-between items-center">
-                           <div>
-                              <span className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
-                                 {name}
-                              </span>
-                              <span className="ml-3 text-sm text-zinc-500 dark:text-zinc-400">
-                                 {albumCount} albums
-                              </span>
-                           </div>
+            {/* Error */}
+            {error && (
+               <p className="text-red-600 dark:text-red-400">⚠️ {error}</p>
+            )}
 
-                           <span className="text-zinc-600 dark:text-zinc-400">
-                              {artist.playcount.toLocaleString()} listens
-                           </span>
-                        </summary>
+            {/* Results */}
+            {!loading && !error && sortedArtists.length > 0 && (
+               <>
+                  <h2 className="text-xl font-medium text-zinc-900 dark:text-zinc-100 mb-2">
+                     All-Time Top Artists ({sortedArtists.length})
+                  </h2>
 
-                        <div className="mt-4 flex flex-col gap-2">
-                           {albumEntries
-                              .sort((a, b) => b[1].playcount - a[1].playcount)
-                              .map(([albumName, album]) => (
-                                 <div
-                                    key={albumName}
-                                    className="flex justify-between text-sm text-zinc-700 dark:text-zinc-300"
-                                 >
-                                    <span>{albumName}</span>
-                                    <span>
-                                       {album.playcount.toLocaleString()} plays
+                  <div className="flex flex-col gap-4 w-full">
+                     {sortedArtists.map(([name, artist]) => {
+                        const albumEntries = Object.entries(artist.albums);
+                        const albumCount = albumEntries.length;
+
+                        return (
+                           <details
+                              key={name}
+                              className="rounded-xl border border-zinc-200 dark:border-zinc-700 p-4 shadow-sm hover:shadow-md transition-all"
+                           >
+                              <summary className="cursor-pointer flex justify-between items-center">
+                                 <div>
+                                    <span className="text-lg font-medium text-zinc-900 dark:text-zinc-100">
+                                       {name}
+                                    </span>
+                                    <span className="ml-3 text-sm text-zinc-500 dark:text-zinc-400">
+                                       {albumCount} albums
                                     </span>
                                  </div>
-                              ))}
-                        </div>
-                     </details>
-                  );
-               })}
-            </div>
+
+                                 <span className="text-zinc-600 dark:text-zinc-400">
+                                    {artist.playcount.toLocaleString()} listens
+                                 </span>
+                              </summary>
+
+                              <div className="mt-4 flex flex-col gap-2">
+                                 {albumEntries
+                                    .sort(
+                                       (a, b) =>
+                                          b[1].playcount - a[1].playcount,
+                                    )
+                                    .map(([albumName, album]) => (
+                                       <div
+                                          key={albumName}
+                                          className="flex justify-between text-sm text-zinc-700 dark:text-zinc-300"
+                                       >
+                                          <span>{albumName}</span>
+                                          <span>
+                                             {album.playcount.toLocaleString()}{" "}
+                                             plays
+                                          </span>
+                                       </div>
+                                    ))}
+                              </div>
+                           </details>
+                        );
+                     })}
+                  </div>
+               </>
+            )}
          </main>
       </div>
    );
