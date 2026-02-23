@@ -8,20 +8,39 @@ datasource db {
 }
 
 model Artist {
-  id             Int             @id @default(autoincrement())
-  name           String          @unique
-  aliases        Json?
-  IgnoreGrouping IgnoreGrouping?
+  id                        Int           @id @default(autoincrement())
+  name                      String        @unique(map: "Artist_name_key1")
+  aliases                   Json?
+  ignoreChineseCanonization Boolean       @default(false)
+  ArtistAlbums              ArtistAlbum[]
+  SameNames                 SameNames[]
 }
 
-model IgnoreCanonicalization {
-  id   Int    @id @unique @default(autoincrement())
-  name String @unique(map: "IgnoreCanonicalization_artistName_key")
+model Album {
+  id            Int           @id @default(autoincrement())
+  name          String        @unique
+  aliases       Json?
+  AlbumsArtists ArtistAlbum[]
 }
 
-model IgnoreGrouping {
-  id       Int     @id @default(autoincrement())
-  name     String  @unique
-  artistId Int?    @unique
-  artist   Artist? @relation(fields: [artistId], references: [id])
+model ArtistAlbum {
+  artistId Int
+  albumId  Int
+  role     Int    @default(0)
+  Albums   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  Artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+
+  @@id([artistId, albumId])
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SameNames {
+  id        Int     @id @default(autoincrement())
+  groupID   Int
+  name      String
+  albumIDs  Json    @default("[]") @db.Json
+  isDefault Boolean @default(false)
+  Artist    Artist  @relation(fields: [groupID], references: [id], onDelete: NoAction)
+
+  @@index([groupID, name])
 }
