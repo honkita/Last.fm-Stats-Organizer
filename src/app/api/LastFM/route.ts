@@ -320,34 +320,15 @@ const buildResult = async (
    for (const [artistName, lfmAlbum] of Object.entries(lfmAlbumMap)) {
       for (const [albumName, album] of Object.entries(lfmAlbum)) {
          // Remove the - Single or - EP suffixes for better matching
-         const removed = String(
-            albumName
-               .replace(
-                  /\s*(-)\s*(Single|EP|single|ep|\(Deluxe\)|\(Deluxe Edition\))$/i,
-                  "",
-               )
-               .replace(
-                  /\s*(Single|EP|single|ep|\(Deluxe\)|\(Deluxe Edition\))$/i,
-                  "",
-               )
-               .replace(/\s*\s*(ep)$/i, "")
-               .trim(),
+         const removed = albumName.replace(
+            /\s+-\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i,
+            "",
          );
 
-         const cleanedName = String(
-            albumName
-               .replace(
-                  /\s+(-)\s+(Single|EP|single|ep|\(Deluxe\)|\(Deluxe Edition\))$/i,
-                  "",
-               )
-               .replace(
-                  /\s+(Single|EP|single|ep|\(Deluxe\)|\(Deluxe Edition\))$/i,
-                  "",
-               )
-               .replace(/\s+(ep)$/i, "")
-               .trim()
-               .toLowerCase(),
-         );
+         const cleanedName = albumName
+            .replace(/\s+-\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+            .trim()
+            .toLowerCase();
 
          addAlbumMapping(cleanedName, removed);
 
