@@ -321,12 +321,12 @@ const buildResult = async (
       for (const [albumName, album] of Object.entries(lfmAlbum)) {
          // Remove the - Single or - EP suffixes for better matching
          const removed = albumName.replace(
-            /\s+-\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i,
+            /\s+-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i,
             "",
          );
 
          const cleanedName = albumName
-            .replace(/\s+-\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+            .replace(/\s+-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
             .trim()
             .toLowerCase();
 
