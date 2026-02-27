@@ -6,7 +6,6 @@ import { prisma } from "@/lib/prisma";
 // Utils
 import { getAlbums } from "@/utils/databaseAlbums";
 import { getArtists } from "@/utils/databaseArtists";
-import { getAlbumName } from "@/utils/albumMapping";
 import { normalizeArtistFull } from "@/utils/normalizeName";
 
 // Types
@@ -22,6 +21,10 @@ import type { lfmArtistAlbumMapType } from "@/types/LastFM";
 // Environment Variables
 const API_KEY = process.env.NEXT_PUBLIC_LASTFM_API_KEY!;
 const API_URL = "https://ws.audioscrobbler.com/2.0/";
+
+// Non normalized names
+
+const nonNormalizedAlbumNames: Record<string, string> = {};
 
 // TEMPORARY FIX FOR SOME ARTISTS (FUCKING LAST.FM)
 
@@ -333,7 +336,7 @@ const albumNormalization = async (
    for (const [artistName, data] of Object.entries(mergedAlbumArtists)) {
       const updatedAlbums: artistCleanAlbumsMapType = {};
       for (const [albumName, albumData] of Object.entries(data.albums)) {
-         const mappedName = getAlbumName(albumName) || albumName;
+         const mappedName = nonNormalizedAlbumNames[albumName] || albumName;
          updatedAlbums[mappedName] = albumData;
       }
       mergedAlbumArtists[artistName].albums = updatedAlbums;
@@ -478,6 +481,8 @@ const buildFromTracks = (
          playcount: 0,
          image: track.image?.[track.image.length - 1]?.["#text"] ?? "",
       };
+
+      nonNormalizedAlbumNames[cleanedAlbum] = albumRaw;
 
       result[artistName].albums[cleanedAlbum].playcount += 1;
    }
