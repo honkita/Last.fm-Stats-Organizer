@@ -14,11 +14,6 @@ interface ArtistData {
    albums: Record<string, Album>;
 }
 
-interface ApiResponse {
-   "Best Albums": string[];
-   "All Data": Record<string, ArtistData>;
-}
-
 export default function Home() {
    const [username, setUsername] = useState("");
    const [submittedUser, setSubmittedUser] = useState<string | null>(null);
@@ -37,13 +32,11 @@ export default function Home() {
          );
          if (!res.ok) throw new Error("Failed to fetch artists");
 
-         const data: ApiResponse = await res.json();
+         const data = await res.json();
          setArtists(data["All Data"]);
       } catch (err: unknown) {
          if (err instanceof Error) setError(err.message);
          else setError("An unknown error occurred");
-      } finally {
-         setLoading(false);
       }
    };
 
