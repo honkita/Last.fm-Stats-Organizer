@@ -474,6 +474,7 @@ const buildFromTracks = (
       const cleanedAlbum = albumRaw
          .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
          .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+         .replace(" - EP", "")
          .trim()
          .toLowerCase();
 
