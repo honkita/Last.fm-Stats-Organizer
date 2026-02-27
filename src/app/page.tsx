@@ -1,24 +1,23 @@
 "use client";
 
-import { useState, useMemo } from "react";
-
-interface Album {
-   playcount: number;
-   image?: string;
-}
-
-interface ArtistData {
-   id: number;
-   playcount: number;
-   ignoreChinese: boolean;
-   albums: Record<string, Album>;
-}
+import {
+   artistAlbumContainerMapType,
+   artistAlbumTopAlbum,
+} from "@/types/Music";
+import { useState } from "react";
 
 export default function Home() {
    const [username, setUsername] = useState("");
    const [submittedUser, setSubmittedUser] = useState<string | null>(null);
 
-   const [artists, setArtists] = useState<Record<string, ArtistData>>({});
+   const [artists, setArtists] = useState<Record<string, artistAlbumTopAlbum>>(
+      {},
+   );
+
+   const [artistAlbums, setArtistAlbums] = useState<
+      Record<string, artistAlbumContainerMapType>
+   >({});
+
    const [loading, setLoading] = useState(false);
    const [error, setError] = useState<string | null>(null);
 
@@ -32,11 +31,22 @@ export default function Home() {
          );
          if (!res.ok) throw new Error("Failed to fetch artists");
 
-         const data = await res.json();
-         setArtists(data["All Data"]);
+         const call = await res.json();
+         const artistAlbums = call["All Data"] as Record<
+            string,
+            artistAlbumContainerMapType
+         >;
+         setArtistAlbums(artistAlbums);
+         const data = call["Best Albums"] as Record<
+            string,
+            artistAlbumTopAlbum
+         >;
+         setArtists(data);
       } catch (err: unknown) {
          if (err instanceof Error) setError(err.message);
          else setError("An unknown error occurred");
+      } finally {
+         setLoading(false);
       }
    };
 
@@ -44,15 +54,14 @@ export default function Home() {
       e.preventDefault();
       if (!username.trim()) return;
 
-      setSubmittedUser(username.trim());
-      fetchArtists(username.trim());
+      const trimmedUser = username.trim();
+      setSubmittedUser(trimmedUser);
+      fetchArtists(trimmedUser);
    };
 
-   const sortedArtists = useMemo(() => {
-      return Object.entries(artists).sort(
-         ([, a], [, b]) => b.playcount - a.playcount,
-      );
-   }, [artists]);
+   const sortedArtists = Object.values(artists).sort(
+      (a, b) => b.playcount - a.playcount,
+   );
 
    return (
       <div className="flex min-h-screen justify-center bg-zinc-50 font-sans dark:bg-black">
@@ -88,7 +97,9 @@ export default function Home() {
 
             {/* Error */}
             {error && (
-               <p className="text-red-600 dark:text-red-400">⚠️ {error}</p>
+               <p className="text-red-600 dark:text-red-400 mb-4">
+                  Error: {error}
+               </p>
             )}
 
             {/* Results */}
@@ -99,8 +110,13 @@ export default function Home() {
                   </h2>
 
                   <div className="flex flex-col gap-4 w-full">
-                     {sortedArtists.map(([name, artist]) => {
-                        const albumEntries = Object.entries(artist.albums);
+                     {sortedArtists.map((artist) => {
+                        const name = artist.name;
+
+                        const albumData = artistAlbums[name];
+                        if (!albumData) return null; // defensive guard
+
+                        const albumEntries = Object.entries(albumData.albums);
                         const albumCount = albumEntries.length;
 
                         return (
