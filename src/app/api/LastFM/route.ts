@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 // Utils
 import { getAlbums } from "@/utils/databaseAlbums";
 import { getArtists } from "@/utils/databaseArtists";
-import { addAlbumMapping, getAlbumName } from "@/utils/albumMapping";
+import { getAlbumName } from "@/utils/albumMapping";
 import { normalizeArtistFull } from "@/utils/normalizeName";
 
 // Types
@@ -17,12 +17,7 @@ import type {
    artistCleanAlbumsMapType,
    artistAlbumTopAlbum,
 } from "@/types/Music";
-import type {
-   lfmArtist,
-   lfmAlbum,
-   lfmArtistAlbumMapType,
-   lfmAlbumMapType,
-} from "@/types/LastFM";
+import type { lfmArtistAlbumMapType } from "@/types/LastFM";
 
 // Environment Variables
 const API_KEY = process.env.NEXT_PUBLIC_LASTFM_API_KEY!;
@@ -30,38 +25,25 @@ const API_URL = "https://ws.audioscrobbler.com/2.0/";
 
 // TEMPORARY FIX FOR SOME ARTISTS (FUCKING LAST.FM)
 
-const mapping: Record<string, string> = {
-   "Triple S": "tripleS",
-   "Baby Monster": "BABYMONSTER",
-   에일리: "Ailee",
-   소녀시대: "SNSD",
-   여자친구: "GFRIEND",
-   "Stay-C": "STAYC",
-   Ke$ha: "Kesha",
-   박봄: "Park Bom",
-   まらしぃ: "marasy",
-};
+// const mapping: Record<string, string> = {
+//    "Triple S": "tripleS",
+//    "Baby Monster": "BABYMONSTER",
+//    에일리: "Ailee",
+//    소녀시대: "SNSD",
+//    여자친구: "GFRIEND",
+//    "Stay-C": "STAYC",
+//    Ke$ha: "Kesha",
+//    박봄: "Park Bom",
+//    まらしぃ: "marasy",
+// };
 
-/**
- * Fetches all pages concurrently
- * @param url
- * @param totalPages
- * @returns Promise<any[]>
- */
-const fetchAllPages = async <T>(
-   url: string,
-   totalPages: number,
-): Promise<T[]> => {
-   const promises: Promise<T>[] = [];
-
-   for (let p = 2; p <= totalPages; p++) {
-      promises.push(
-         fetch(url + `&page=${p}`).then((r) => r.json() as Promise<T>),
-      );
-   }
-
-   return Promise.all(promises);
-};
+interface lfmRecentTrack {
+   artist: { "#text": string };
+   album: { "#text": string };
+   name: string;
+   image?: { "#text": string }[];
+   date?: { uts: string };
+}
 
 /**
  * Fetches all items from Last.fm
@@ -70,59 +52,50 @@ const fetchAllPages = async <T>(
  * @param apiKey
  * @returns Promise<T[]>
  */
-const fetchAllLastFm = async <T>(
-   method: string,
+const fetchAllRecentTracks = async (
    username: string,
-   apiKey: string,
-): Promise<T[]> => {
-   const baseURL = `${API_URL}?method=${method}&user=${username}&api_key=${apiKey}&format=json&limit=1000`;
+): Promise<lfmRecentTrack[]> => {
+   const limit = 1000;
+   const base = `${API_URL}?method=user.getrecenttracks&user=${username}&api_key=${API_KEY}&format=json&limit=${limit}`;
 
-   const first = await fetch(baseURL + "&page=1").then((r) => r.json());
-
-   const items: T[] = [];
-   let totalPages = 1;
-
-   if (method === "user.gettopartists") {
-      const data = first as {
-         topartists: {
-            artist: T[];
-            "@attr": { totalPages: string };
-         };
+   const first: {
+      recenttracks: {
+         track: lfmRecentTrack[];
+         "@attr": { totalPages: string };
       };
+   } = await fetchWithTimeout(base + "&page=1");
 
-      items.push(...data.topartists.artist);
-      totalPages = Number(data.topartists["@attr"].totalPages);
-   } else {
-      const data = first as {
-         topalbums: {
-            album: T[];
-            "@attr": { totalPages: string };
-         };
-      };
-
-      items.push(...data.topalbums.album);
-      totalPages = Number(data.topalbums["@attr"].totalPages);
-   }
+   const totalPages = Number(first.recenttracks["@attr"].totalPages);
+   const tracks: lfmRecentTrack[] = first.recenttracks.track.filter(
+      (t) => t.date,
+   );
 
    if (totalPages > 1) {
-      const rest = await fetchAllPages<typeof first>(baseURL, totalPages);
+      const pages = await Promise.all(
+         Array.from({ length: totalPages - 1 }, (_, i) =>
+            fetchWithTimeout<{ recenttracks: { track: lfmRecentTrack[] } }>(
+               base + `&page=${i + 2}`,
+            ),
+         ),
+      );
 
-      for (const page of rest) {
-         if (method === "user.gettopartists") {
-            const data = page as {
-               topartists: { artist: T[] };
-            };
-            items.push(...data.topartists.artist);
-         } else {
-            const data = page as {
-               topalbums: { album: T[] };
-            };
-            items.push(...data.topalbums.album);
-         }
+      for (const page of pages) {
+         tracks.push(...page.recenttracks.track.filter((t) => t.date));
       }
    }
 
-   return items;
+   return tracks;
+};
+
+const fetchWithTimeout = async <T>(url: string, ms = 300000): Promise<T> => {
+   const controller = new AbortController();
+   const timeout = setTimeout(() => controller.abort(), ms);
+   try {
+      const res = await fetch(url, { signal: controller.signal });
+      return res.json() as Promise<T>;
+   } finally {
+      clearTimeout(timeout);
+   }
 };
 
 /**
@@ -282,87 +255,6 @@ const mergeArtists = async (
    }
 
    return merged;
-};
-
-/**
- * Builds the final result
- * @param merged
- * @param dbArtistMap
- * @param albums
- * @returns
- */
-const buildResult = async (
-   lfmArtistsMap: Record<string, number>,
-   lfmAlbumMap: lfmAlbumMapType,
-): Promise<lfmArtistAlbumMapType> => {
-   const lfmArtistAlbumMap: lfmArtistAlbumMapType = {};
-
-   for (const [artistName, playcount] of Object.entries(lfmArtistsMap)) {
-      if (mapping[artistName]) {
-         lfmArtistAlbumMap[mapping[artistName]] = {
-            playcount: playcount,
-            albums: {
-               ...lfmArtistAlbumMap[mapping[artistName]]?.albums,
-               ...lfmArtistAlbumMap[artistName]?.albums,
-            },
-         };
-         lfmAlbumMap[mapping[artistName]] = {
-            ...lfmAlbumMap[mapping[artistName]],
-            ...lfmAlbumMap[artistName],
-         };
-      } else {
-         lfmArtistAlbumMap[artistName] = {
-            playcount: playcount,
-            albums: lfmArtistAlbumMap[artistName]?.albums ?? {},
-         };
-         lfmAlbumMap[artistName] = {
-            ...lfmAlbumMap[artistName],
-         };
-      }
-   }
-
-   for (const [artistName, lfmAlbum] of Object.entries(lfmAlbumMap)) {
-      for (const [albumName, album] of Object.entries(lfmAlbum)) {
-         // Remove the - Single or - EP suffixes for better matching
-         const removed = albumName
-            .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
-            .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "");
-
-         const cleanedName = albumName
-            .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
-            .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
-            .trim()
-            .toLowerCase();
-         addAlbumMapping(cleanedName, removed);
-
-         // Check if the name of the artist exists in the lfmArtistsMap
-         if (lfmArtistAlbumMap[artistName]) {
-            // Check if the artist already has the album
-            if (
-               lfmArtistAlbumMap[artistName].albums[String(cleanedName)] !==
-               undefined
-            ) {
-               // If it exists, accumulate the playcount
-               lfmArtistAlbumMap[artistName].albums[
-                  String(cleanedName)
-               ].playcount =
-                  Number(
-                     lfmArtistAlbumMap[artistName].albums[String(cleanedName)]
-                        .playcount,
-                  ) + Number(album.playcount);
-
-               // Will need to add the album image checker later, but will leave out for now.....
-            } else {
-               lfmArtistAlbumMap[artistName].albums[String(cleanedName)] =
-                  album;
-            }
-         } else {
-            // If the artist does not exist, create a new entry
-         }
-      }
-   }
-
-   return lfmArtistAlbumMap;
 };
 
 /**
@@ -554,6 +446,45 @@ const getBestAlbum = async (
    return result;
 };
 
+const buildFromTracks = (
+   tracks: lfmRecentTrack[],
+): artistAlbumContainerMapType => {
+   const result: artistAlbumContainerMapType = {};
+
+   for (const track of tracks) {
+      const rawArtist = track.artist["#text"];
+      const albumRaw = track.album["#text"]?.trim();
+
+      if (!albumRaw) continue;
+
+      const artistName = rawArtist;
+
+      result[artistName] ??= {
+         id: -1,
+         playcount: 0,
+         ignoreChinese: false,
+         albums: {},
+      };
+
+      result[artistName].playcount += 1;
+
+      const cleanedAlbum = albumRaw
+         .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+         .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+         .trim()
+         .toLowerCase();
+
+      result[artistName].albums[cleanedAlbum] ??= {
+         playcount: 0,
+         image: track.image?.[track.image.length - 1]?.["#text"] ?? "",
+      };
+
+      result[artistName].albums[cleanedAlbum].playcount += 1;
+   }
+
+   return result;
+};
+
 /**
  * GET Handler
  * @returns NextResponse
@@ -662,35 +593,14 @@ const GET = async (req: Request) => {
          dbAlbumsMap[artistName][albumName] = aliases;
       });
 
-      const [lfmArtists, lfmAlbums] = await Promise.all([
-         fetchAllLastFm<lfmArtist>("user.gettopartists", USERNAME, API_KEY),
-         fetchAllLastFm<lfmAlbum>("user.gettopalbums", USERNAME, API_KEY),
-      ]);
-      // Organize the fetched artists and albums into desired structure with hashmap
-      const lfmArtistMap: Record<string, number> = {};
-      lfmArtists.forEach(
-         (artist) => (lfmArtistMap[artist.name] = artist.playcount),
-      );
+      const tracks = await fetchAllRecentTracks(USERNAME);
 
-      const lfmAlbumMap: lfmAlbumMapType = {};
-      lfmAlbums.forEach((album) => {
-         const artist = album.artist.name;
-         const name = album.name;
-         lfmAlbumMap[artist] ??= {};
-
-         lfmAlbumMap[artist][name] = {
-            image: album.image[album.image.length - 1]["#text"],
-            playcount: Number(album.playcount),
-         };
-      });
+      const built = await buildFromTracks(tracks);
 
       // Split artists based on default and same name mappings
       const splitArtistList = await splitArtists(
          await albumNormalization(
-            await mergeArtists(
-               await buildResult(lfmArtistMap, lfmAlbumMap),
-               dbArtistMap,
-            ),
+            await mergeArtists(built, dbArtistMap),
             dbAlbumsMap,
          ),
          defaultArtist,
