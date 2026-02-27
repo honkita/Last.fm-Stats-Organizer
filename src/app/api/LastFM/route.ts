@@ -456,7 +456,11 @@ const buildFromTracks = (
 
    for (const track of tracks) {
       const rawArtist = track.artist["#text"];
-      const albumRaw = track.album["#text"]?.trim();
+      const albumRaw = track.album["#text"]
+         ?.replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+         .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+         .replace(" - EP", "")
+         .trim();
 
       if (!albumRaw) continue;
 
