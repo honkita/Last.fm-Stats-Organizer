@@ -398,6 +398,7 @@ const buildFromTracks = (
          ?.replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
          .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
          .replace(" - EP", "")
+         .replace(/\s*\((The Extended Mixes|Unmixed Extended Versions)\)/i, "")
          .trim();
 
       if (!albumRaw) continue;
@@ -417,6 +418,7 @@ const buildFromTracks = (
          .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
          .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
          .replace(" - EP", "")
+         .replace(/\s*\((The Extended Mixes|Unmixed Extended Versions)\)/i, "")
          .trim()
          .toLowerCase();
 
