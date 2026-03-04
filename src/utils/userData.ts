@@ -405,8 +405,8 @@ const buildFromTracks = (
    for (const track of tracks) {
       const rawArtist = track.artist["#text"];
       const albumRaw = track.album["#text"]
-         ?.replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
-         .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+         ?.replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
+         .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
          .replace(" - EP", "")
          .replace(/\s*\((The Extended Mixes|Unmixed Extended Versions)\)/i, "")
          .trim();
@@ -425,8 +425,8 @@ const buildFromTracks = (
       result[artistName].playcount += 1;
 
       const cleanedAlbum = albumRaw
-         .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
-         .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition)?\))$/i, "")
+         .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
+         .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
          .replace(" - EP", "")
          .replace(/\s*\((The Extended Mixes|Unmixed Extended Versions)\)/i, "")
          .trim()
