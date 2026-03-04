@@ -1,26 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+   --background: #ffffff;
+   --foreground: #171717;
+   --main-text: #000000;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+   --color-background: var(--background);
+   --color-foreground: var(--foreground);
+   --font-sans: "Noto Sans", sans-serif;
+   --font-mono: "Noto Sans Mono", monospace;
+}
+
+@theme {
+   --color-clementine-50: #fdf7ef;
+   --color-clementine-100: #fbecd9;
+   --color-clementine-200: #f6d6b2;
+   --color-clementine-300: #f0ba81;
+   --color-clementine-400: #e9944e;
+   --color-clementine-500: #e37325;
+   --color-clementine-600: #d55f21;
+   --color-clementine-700: #b1481d;
+   --color-clementine-800: #8d3a1f;
+   --color-clementine-900: #72321c;
+   --color-clementine-950: #3d170d;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+   :root {
+      --background: #0a0a0a;
+      --foreground: #ededed;
+      --main-text: #ffffff;
+   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+   background: var(--background);
+   color: var(--foreground);
+   font-family: var(--font-sans);
 }
