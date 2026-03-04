@@ -50,6 +50,7 @@ export const normalizeBrackets = (str: string): string => {
    return str
       .replace(/([【\(])/g, leftBracket)
       .replace(/([】\)])/g, rightBracket)
+      .replace(/\(\s+/g, "(")
       .trim();
 };
 
@@ -70,22 +71,47 @@ export const normalizeArtistFull = async (
 };
 
 /**
+ * Convert ASCII digits (0-9) to full-width digits (０-９)
+ */
+// export const toFullWidthNumbers = (input: string): string => {
+//    return input.replace(/[0-9]/g, (digit) =>
+//       String.fromCharCode(digit.charCodeAt(0) + 0xfee0),
+//    );
+// };
+
+/**
+ * Convert full-width digits (０-９) to ASCII digits (0-9)
+ */
+export const toHalfWidthNumbers = (input: string): string => {
+   return input.replace(/[０-９]/g, (digit) =>
+      String.fromCharCode(digit.charCodeAt(0) - 0xfee0),
+   );
+};
+
+/**
+ * Canonical album key (FOR MATCHING ONLY)
+ */
+export const canonicalAlbumKey = (name: string): string => {
+   return normalizeAlbumFull(normalizeBrackets(toHalfWidthNumbers(name)))
+      .replace(/\(\s+/g, "(")
+      .replace(/\s+\)/g, ")")
+      .toLowerCase();
+};
+
+/**
  * Full album name normalization
- * @param name
- * @returns
  */
 export const normalizeAlbumFull = (name: string): string => {
-   return normalizeBrackets(
+   const normalized = normalizeBrackets(
       name
          .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
          .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
-
          .replace(" - EP", "")
          .replace(/\s*\((The Extended Mixes|Unmixed Extended Versions)\)/i, "")
          .trim(),
-   )
-      .replace(/Version\s*\)$/i, "Ver.)")
-      .replace(/\(\s+$/i, "(");
+   ).replace(/Version\s*\)$/i, "Ver.)");
+
+   return toHalfWidthNumbers(normalized);
 };
 
 /**

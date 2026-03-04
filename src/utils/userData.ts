@@ -1,5 +1,9 @@
 // Utils
-import { normalizeArtistFull, normalizeAlbumFull } from "@/utils/normalizeName";
+import {
+   normalizeArtistFull,
+   normalizeAlbumFull,
+   canonicalAlbumKey,
+} from "@/utils/normalizeName";
 import { fetchAllPages } from "@/utils/userTracks";
 
 // Types
@@ -209,12 +213,13 @@ const albumNormalization = async (
       for (const albumName of Object.keys(albums)) {
          const aliasNorms = albums[albumName];
          aliasNorms.forEach((a) => {
-            aliasMap[normalizeAlbumFull(a.toLowerCase())] = albumName;
+            aliasMap[canonicalAlbumKey(a)] = normalizeAlbumFull(albumName);
          });
 
          // Add album name itself to the alias map
          if (albumName.toLowerCase() != albumName) {
-            aliasMap[normalizeAlbumFull(albumName).toLowerCase()] = albumName;
+            aliasMap[canonicalAlbumKey(albumName)] =
+               normalizeAlbumFull(albumName);
          }
       }
 
@@ -419,7 +424,7 @@ const buildFromTracks = (
 
       result[artistName].playcount += 1;
 
-      const cleanedAlbum = normalizeAlbumFull(albumRaw).toLowerCase();
+      const cleanedAlbum = canonicalAlbumKey(track.album["#text"] || "");
 
       result[artistName].albums[cleanedAlbum] ??= {
          playcount: 0,
