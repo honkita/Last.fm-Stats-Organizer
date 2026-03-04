@@ -43,14 +43,13 @@ export const normalizeCommas = (str: string): string => {
 export const normalizeBrackets = (str: string): string => {
    if (!str) return str;
 
-   const useCJKBracket = isCJK(str);
-   const leftBracket = useCJKBracket ? "【" : "(";
-   const rightBracket = useCJKBracket ? "】" : ")";
+   const leftBracket = "(";
+   const rightBracket = ")";
 
    // Normalize all comma variants but *preserve chosen comma style*
    return str
-      .replace(/\s*([【\()])\s*/g, leftBracket)
-      .replace(/\s*([】\))])\s*/g, rightBracket)
+      .replace(/([【\(])/g, leftBracket)
+      .replace(/([】\)])/g, rightBracket)
       .trim();
 };
 
@@ -76,7 +75,17 @@ export const normalizeArtistFull = async (
  * @returns
  */
 export const normalizeAlbumFull = (name: string): string => {
-   return normalizeBrackets(name.replace(/\s*-\s*(Single|EP)$/i, "").trim());
+   return normalizeBrackets(
+      name
+         .replace(/\s-\s*?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
+         .replace(/\s+?(?:EP|Single|\(Deluxe(?: Edition|Version)?\))$/i, "")
+
+         .replace(" - EP", "")
+         .replace(/\s*\((The Extended Mixes|Unmixed Extended Versions)\)/i, "")
+         .trim(),
+   )
+      .replace(/Version\s*\)$/i, "Ver.)")
+      .replace(/\(\s+$/i, "(");
 };
 
 /**
