@@ -241,7 +241,10 @@ const albumNormalization = async (
                };
 
                // Remove the old album entry
-               delete mergedAlbumArtists[artistName]["albums"][oldName];
+               if (oldName !== normalizedName) {
+                  delete mergedAlbumArtists[artistName]["albums"][oldName];
+               } else {
+               }
             } else {
                let mainName: string | undefined = aliasMap[oldName];
 
@@ -267,10 +270,17 @@ const albumNormalization = async (
    // Fix the album titles using the name mapping
    for (const [artistName, data] of Object.entries(mergedAlbumArtists)) {
       const updatedAlbums: artistCleanAlbumsMapType = {};
+
       for (const [albumName, albumData] of Object.entries(data.albums)) {
-         const mappedName = nonNormalizedAlbumNames[albumName] || albumName;
+         // If this album came from DB normalization, keep it as-is
+         // Only fallback to original casing if it was never normalized
+         const mappedName = lfmAlbumMap[artistName]?.[albumName]
+            ? albumName
+            : nonNormalizedAlbumNames[albumName] || albumName;
+
          updatedAlbums[mappedName] = albumData;
       }
+
       mergedAlbumArtists[artistName].albums = updatedAlbums;
    }
 
