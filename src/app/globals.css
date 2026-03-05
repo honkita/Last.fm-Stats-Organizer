@@ -2,13 +2,14 @@
 @import "tailwindcss";
 
 :root {
-   --background: #ffffff;
-   --foreground: #171717;
-   --main-text: #000000;
+   --color-background: var(--color-clementine-100);
+   --color-foreground: var(--foreground);
+   --font-sans: "Noto Sans", sans-serif;
+   --font-mono: "Noto Sans Mono", monospace;
 }
 
 @theme inline {
-   --color-background: var(--background);
+   --color-background: var(--color-clementine-50);
    --color-foreground: var(--foreground);
    --font-sans: "Noto Sans", sans-serif;
    --font-mono: "Noto Sans Mono", monospace;
@@ -30,9 +31,10 @@
 
 @media (prefers-color-scheme: dark) {
    :root {
-      --background: #0a0a0a;
-      --foreground: #ededed;
-      --main-text: #ffffff;
+      --color-background: var(--color-clementine-900);
+      --color-foreground: var(--foreground);
+      --font-sans: "Noto Sans", sans-serif;
+      --font-mono: "Noto Sans Mono", monospace;
    }
 }
 
