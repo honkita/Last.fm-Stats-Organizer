@@ -1,6 +1,10 @@
 "use client";
 
+// React
 import { useState, useMemo } from "react";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+
+// Chakra UI
 import {
    Box,
    Container,
@@ -14,6 +18,9 @@ import {
    Progress,
 } from "@chakra-ui/react";
 
+// Components
+import Emoji from "@/components/Emoji/Emoji";
+
 // Utils
 import { getUserInfo } from "@/utils/userData";
 
@@ -25,12 +32,12 @@ import {
 
 const PAGE_SIZE = 100;
 
-export default function Home() {
+const Home = () => {
    const [username, setUsername] = useState("");
    const [submittedUser, setSubmittedUser] = useState<string | null>(null);
 
    const [artists, setArtists] = useState<Record<string, artistAlbumTopAlbum>>(
-      {}
+      {},
    );
 
    const [artistAlbums, setArtistAlbums] =
@@ -99,7 +106,16 @@ export default function Home() {
          <Container maxW="3xl">
             <VStack align="stretch" gap={8}>
                {/* Header */}
-               <Heading size="lg">🎧 Last.fm Album Stats</Heading>
+               <Box width="100%" textAlign="center">
+                  <Heading
+                     size="3xl"
+                     color="black"
+                     fontWeight={"Bold"}
+                     fontFamily="var(--font-sans)"
+                  >
+                     <Emoji text="🎧" /> Last.fm Summarized Album Stats
+                  </Heading>
+               </Box>
 
                {/* Form */}
                <form onSubmit={handleSubmit}>
@@ -109,8 +125,12 @@ export default function Home() {
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
                      />
-                     <Button type="submit" colorPalette="orange">
-                        →
+                     <Button
+                        aspectRatio="1"
+                        type="submit"
+                        backgroundColor="brand.primaryAccent"
+                     >
+                        <FaArrowRight color="white" />
                      </Button>
                   </HStack>
                </form>
@@ -118,7 +138,9 @@ export default function Home() {
                {/* Loading */}
                {loading && (
                   <VStack align="stretch" gap={3}>
-                     <Text>Fetching scrobbles for {submittedUser}</Text>
+                     <Text fontFamily="var(--font-sans)">
+                        Fetching scrobbles for {submittedUser}
+                     </Text>
 
                      <Progress.Root
                         value={
@@ -127,11 +149,10 @@ export default function Home() {
                               : 0
                         }
                         size="sm"
-                        colorPalette="orange"
                         borderRadius="md"
                      >
                         <Progress.Track>
-                           <Progress.Range />
+                           <Progress.Range bg="brand.primaryAccent" />
                         </Progress.Track>
                      </Progress.Root>
 
@@ -152,7 +173,7 @@ export default function Home() {
                {!loading && !error && sortedArtists.length > 0 && (
                   <>
                      <Heading size="md">
-                        All-Time Top Artists ({sortedArtists.length})
+                        <Emoji text="👤" /> {sortedArtists.length}
                      </Heading>
 
                      <Accordion.Root multiple gap={10}>
@@ -161,7 +182,9 @@ export default function Home() {
                            const albumData = artistAlbums[name];
                            if (!albumData) return null;
 
-                           const albumEntries = Object.entries(albumData.albums);
+                           const albumEntries = Object.entries(
+                              albumData.albums,
+                           );
                            const albumCount = albumEntries.length;
 
                            return (
@@ -181,15 +204,23 @@ export default function Home() {
                                        align="center"
                                     >
                                        <HStack gap={3}>
-                                          <Text fontWeight="semibold">{name}</Text>
-
+                                          <Text fontWeight="semibold">
+                                             {name}
+                                          </Text>
                                        </HStack>
                                        <VStack gap={3} alignItems="flex-end">
-                                          <Text fontWeight="medium" textAlign="right">
-                                             {artist.playcount.toLocaleString()} 🎧
+                                          <Text
+                                             fontWeight="medium"
+                                             textAlign="right"
+                                          >
+                                             {artist.playcount.toLocaleString()}{" "}
+                                             <Emoji text="🎧" />
                                           </Text>
-                                          <Text fontWeight="medium" textAlign="right">
-                                             {albumCount} 💽
+                                          <Text
+                                             fontWeight="medium"
+                                             textAlign="right"
+                                          >
+                                             {albumCount} <Emoji text="💽" />
                                           </Text>
                                        </VStack>
                                     </HStack>
@@ -200,7 +231,7 @@ export default function Home() {
                                        {albumEntries
                                           .sort(
                                              (a, b) =>
-                                                b[1].playcount - a[1].playcount
+                                                b[1].playcount - a[1].playcount,
                                           )
                                           .map(([albumName, album]) => (
                                              <HStack
@@ -210,7 +241,8 @@ export default function Home() {
                                              >
                                                 <Text>{albumName}</Text>
                                                 <Text color="gray.500">
-                                                   {album.playcount.toLocaleString()} plays
+                                                   {album.playcount.toLocaleString()}{" "}
+                                                   <Emoji text="🎧" />
                                                 </Text>
                                              </HStack>
                                           ))}
@@ -225,13 +257,15 @@ export default function Home() {
                      {totalPages > 1 && (
                         <HStack justify="center" gap={6} pt={6}>
                            <Button
+                              aspectRatio="1"
                               onClick={() =>
                                  setCurrentPage((p) => Math.max(p - 1, 1))
                               }
                               disabled={currentPage === 1}
                               size="sm"
+                              backgroundColor="brand.primaryAccent"
                            >
-                              ←
+                              <FaArrowLeft />
                            </Button>
 
                            <Text fontSize="sm">
@@ -239,15 +273,17 @@ export default function Home() {
                            </Text>
 
                            <Button
+                              aspectRatio="1"
                               onClick={() =>
                                  setCurrentPage((p) =>
-                                    Math.min(p + 1, totalPages)
+                                    Math.min(p + 1, totalPages),
                                  )
                               }
                               disabled={currentPage === totalPages}
                               size="sm"
+                              backgroundColor="brand.primaryAccent"
                            >
-                              →
+                              <FaArrowRight />
                            </Button>
                         </HStack>
                      )}
@@ -257,4 +293,6 @@ export default function Home() {
          </Container>
       </Box>
    );
-}
+};
+
+export default Home;

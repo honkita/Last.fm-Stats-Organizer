@@ -1,37 +1,14 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { ChakraUIProvider } from "@/components/ui/provider";
 import "./globals.css";
-import { Provider } from "@/components/ui/provider"
 
-const geistSans = Geist({
-   variable: "--font-geist-sans",
-   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-   variable: "--font-geist-mono",
-   subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-   title: "Last FM Stats",
-   description: "Cleaned Up Last.FM stats",
-};
-
-export default function RootLayout({
-   children,
-}: Readonly<{
-   children: React.ReactNode;
-}>) {
+const Layout = ({ children }: { children: React.ReactNode }) => {
    return (
       <html lang="en">
-         <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-         >
-            <Provider>
-               {children}
-            </Provider>
+         <body>
+            <ChakraUIProvider>{children}</ChakraUIProvider>
          </body>
       </html>
    );
-}
+};
+
+export default Layout;

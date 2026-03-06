@@ -1,41 +1,22 @@
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap");
 @import "tailwindcss";
 
 :root {
-   --color-background: var(--color-clementine-100);
-   --color-foreground: var(--foreground);
-   --font-sans: "Noto Sans", sans-serif;
-   --font-mono: "Noto Sans Mono", monospace;
+   --background: #ffffff;
+   --foreground: #171717;
 }
 
 @theme inline {
-   --color-background: var(--color-clementine-50);
+   --color-background: var(--background);
    --color-foreground: var(--foreground);
-   --font-sans: "Noto Sans", sans-serif;
-   --font-mono: "Noto Sans Mono", monospace;
+   --font-sans: "Nunito", sans-serif;
+   --font-emoji: "Noto Emoji", sans-serif;
 }
 
-@theme {
-   --color-clementine-50: #fdf7ef;
-   --color-clementine-100: #fbecd9;
-   --color-clementine-200: #f6d6b2;
-   --color-clementine-300: #f0ba81;
-   --color-clementine-400: #e9944e;
-   --color-clementine-500: #e37325;
-   --color-clementine-600: #d55f21;
-   --color-clementine-700: #b1481d;
-   --color-clementine-800: #8d3a1f;
-   --color-clementine-900: #72321c;
-   --color-clementine-950: #3d170d;
-}
-
-@media (prefers-color-scheme: dark) {
-   :root {
-      --color-background: var(--color-clementine-900);
-      --color-foreground: var(--foreground);
-      --font-sans: "Noto Sans", sans-serif;
-      --font-mono: "Noto Sans Mono", monospace;
-   }
+.emoji {
+   font-family: var(--font-emoji);
+   color: #f38500;
 }
 
 body {
