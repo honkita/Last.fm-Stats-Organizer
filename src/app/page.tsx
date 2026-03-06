@@ -19,7 +19,7 @@ import {
 } from "@chakra-ui/react";
 
 // Components
-import Emoji from "@/components/Emoji/Emoji";
+import Emoji from "@/components/Emoji/emoji";
 
 // Utils
 import { getUserInfo } from "@/utils/userData";
@@ -50,11 +50,25 @@ const Home = () => {
    const [totalPagesLoading, setTotalPagesLoading] = useState(0);
 
    const [currentPage, setCurrentPage] = useState(1);
+   const [scrobbles, setScrobbles] = useState<number | null>(null);
 
    const fetchArtists = async (user: string) => {
       try {
          setLoading(true);
          setError(null);
+
+         try {
+            const res = await fetch("/api/Scrobbles?user=" + user);
+            if (!res.ok) throw new Error("Failed to fetch scrobbles");
+            const data = await res.json();
+            setScrobbles(data.totalScrobbles);
+         } catch (err) {
+            console.log(
+               "Fetching user info for:",
+               user + " failed, error fetching scrobbles:",
+               err,
+            );
+         }
 
          const res = await getUserInfo(user, (current, total) => {
             setProgress(current);
@@ -173,7 +187,14 @@ const Home = () => {
                {!loading && !error && sortedArtists.length > 0 && (
                   <>
                      <Heading size="md">
-                        <Emoji text="👤" /> {sortedArtists.length}
+                        <HStack width="100%" gap={2} alignItems="flex-start">
+                           <HStack>
+                              <Emoji text="👤" /> {sortedArtists.length}
+                           </HStack>
+                           <HStack>
+                              <Emoji text="🎧" /> {scrobbles?.toLocaleString()}
+                           </HStack>
+                        </HStack>
                      </Heading>
 
                      <Accordion.Root multiple gap={10}>
