@@ -3,6 +3,7 @@ import {
    normalizeArtistFull,
    normalizeAlbumFull,
    canonicalAlbumKey,
+   normalizeSpaces,
 } from "@/utils/normalizeName";
 import { fetchAllPages } from "@/utils/userTracks";
 
@@ -215,6 +216,15 @@ const albumNormalization = async (
          aliasNorms.forEach((a) => {
             aliasMap[canonicalAlbumKey(a)] = normalizeAlbumFull(albumName);
          });
+
+         // Check if the album name is the same as its simplified form (MAINLY FOR CHINESE ALBUMS)
+         if (
+            normalizeSpaces(canonicalAlbumKey(albumName)) ===
+            canonicalAlbumKey(normalizeAlbumFull(albumName))
+         ) {
+            aliasMap[canonicalAlbumKey(albumName)] =
+               normalizeAlbumFull(albumName);
+         }
 
          // Add album name itself to the alias map
          if (albumName.toLowerCase() != albumName) {
