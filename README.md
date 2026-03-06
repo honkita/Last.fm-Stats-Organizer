@@ -12,12 +12,6 @@ Originally, this project was a simple script to fetch and clean my Last.fm data 
 
 ## FAQ
 
-### Why is the sum of the albums not equal to the total number of scrobbles for the artist?
+### Why?
 
-This is because some scrobbles are tagged with an empty album name or a single. These scrobbles are still counted towards the total number of scrobbles for the artist, but they are not included in the album count since they lack an album name.
-
-TL:DR: Blame the metadata.
-
-### Why is my account not showing up?
-
-This does NOT work with a private Last.fm account. You need to make your account public for the app to fetch your data.
+Last.fm has been very bad with their API and the way they store music. I haven't even TOUCHED the actual song data, and I am extremely worried about doing that since that would be a literal nightmare. However, the artist data is already a mess, and I want to have it organized in a way that makes sense to me. This project is a way for me to take control of my own data and make it usable for my own purposes.
