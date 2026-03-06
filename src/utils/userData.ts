@@ -3,8 +3,11 @@ import {
    normalizeArtistFull,
    normalizeAlbumFull,
    canonicalAlbumKey,
-   normalizeSpaces,
 } from "@/utils/normalizeName";
+import {
+   simplifiedToTraditional,
+   traditionalToSimplified,
+} from "@/utils/canonicalizeName";
 import { fetchAllPages } from "@/utils/userTracks";
 
 // Types
@@ -215,21 +218,31 @@ const albumNormalization = async (
          const aliasNorms = albums[albumName];
          aliasNorms.forEach((a) => {
             aliasMap[canonicalAlbumKey(a)] = normalizeAlbumFull(albumName);
+            if (simplifiedToTraditional(albumName) != albumName) {
+               aliasMap[canonicalAlbumKey(albumName)] = simplifiedToTraditional(
+                  normalizeAlbumFull(albumName),
+               );
+            } else if (traditionalToSimplified(albumName) != albumName) {
+               aliasMap[canonicalAlbumKey(albumName)] = traditionalToSimplified(
+                  normalizeAlbumFull(albumName),
+               );
+            }
          });
-
-         // Check if the album name is the same as its simplified form (MAINLY FOR CHINESE ALBUMS)
-         if (
-            normalizeSpaces(canonicalAlbumKey(albumName)) ===
-            canonicalAlbumKey(normalizeAlbumFull(albumName))
-         ) {
-            aliasMap[canonicalAlbumKey(albumName)] =
-               normalizeAlbumFull(albumName);
-         }
 
          // Add album name itself to the alias map
          if (albumName.toLowerCase() != albumName) {
             aliasMap[canonicalAlbumKey(albumName)] =
                normalizeAlbumFull(albumName);
+         }
+
+         if (simplifiedToTraditional(albumName) != albumName) {
+            aliasMap[canonicalAlbumKey(albumName)] = simplifiedToTraditional(
+               normalizeAlbumFull(albumName),
+            );
+         } else if (traditionalToSimplified(albumName) != albumName) {
+            aliasMap[canonicalAlbumKey(albumName)] = traditionalToSimplified(
+               normalizeAlbumFull(albumName),
+            );
          }
       }
 
@@ -238,27 +251,31 @@ const albumNormalization = async (
          // If the old album name exists in the artist's albums
          try {
             if (mergedAlbumArtists[artistName]["albums"][oldName]) {
-               mergedAlbumArtists[artistName]["albums"][normalizedName] = {
-                  playcount:
-                     Number(
+               const normalizedAlbum = normalizeAlbumFull(oldName);
+               if (oldName !== normalizedAlbum) {
+                  mergedAlbumArtists[artistName]["albums"][normalizedAlbum] = {
+                     playcount:
+                        Number(
+                           mergedAlbumArtists[artistName]["albums"][oldName]
+                              .playcount,
+                        ) +
+                        Number(
+                           mergedAlbumArtists[artistName]["albums"][
+                              normalizedAlbum
+                           ]?.playcount ?? 0,
+                        ),
+                     image:
+                        mergedAlbumArtists[artistName]["albums"][
+                           normalizedAlbum
+                        ]?.image ??
                         mergedAlbumArtists[artistName]["albums"][oldName]
-                           .playcount,
-                     ) +
-                     Number(
-                        mergedAlbumArtists[artistName]["albums"][normalizedName]
-                           ?.playcount ?? 0,
-                     ),
-                  image:
-                     mergedAlbumArtists[artistName]["albums"][normalizedName]
-                        ?.image ??
-                     mergedAlbumArtists[artistName]["albums"][oldName].image ??
-                     "",
-               };
-
-               // Remove the old album entry
-               if (oldName !== normalizedName) {
-                  delete mergedAlbumArtists[artistName]["albums"][oldName];
-               } else {
+                           .image ??
+                        "",
+                  };
+                  // Remove the old album entry
+                  if (oldName !== normalizedName) {
+                     delete mergedAlbumArtists[artistName]["albums"][oldName];
+                  }
                }
             } else {
                let mainName: string | undefined = aliasMap[oldName];
