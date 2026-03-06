@@ -2,7 +2,7 @@
 
 # Last.fm Stats Organizer
 
-![](https://raw.githubusercontent.com/honkita/PixelButtons/main/Pixel_Maintained.svg)
+![](https://raw.githubusercontent.com/honkita/PixelButtons/main/Pixel_Maintained.svg) ![](https://raw.githubusercontent.com/honkita/PixelIcons/main/Languages/TypeScript.svg) ![](https://raw.githubusercontent.com/honkita/PixelIcons/main/Languages/CSS.svg) ![](https://raw.githubusercontent.com/honkita/PixelIcons/main/Frameworks/Nextjs.svg)
 
 ---
 
