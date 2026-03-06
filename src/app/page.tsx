@@ -20,6 +20,7 @@ import {
 
 // Components
 import Emoji from "@/components/Emoji/emoji";
+import Artist from "@/components/Artist/artist";
 
 // Utils
 import { getUserInfo } from "@/utils/userData";
@@ -52,6 +53,9 @@ const Home = () => {
    const [currentPage, setCurrentPage] = useState(1);
    const [scrobbles, setScrobbles] = useState<number | null>(null);
 
+   // Track which accordion items are open
+   const [openItems, setOpenItems] = useState<string[]>([]);
+
    const fetchArtists = async (user: string) => {
       try {
          setLoading(true);
@@ -81,6 +85,7 @@ const Home = () => {
          setArtistAlbums(allData);
          setArtists(bestAlbums);
          setCurrentPage(1);
+         setOpenItems([]); // Reset open items on new search
       } catch (err: unknown) {
          if (err instanceof Error) setError(err.message);
          else setError("An unknown error occurred");
@@ -197,79 +202,19 @@ const Home = () => {
                         </HStack>
                      </Heading>
 
-                     <Accordion.Root multiple gap={10}>
+                     <Accordion.Root
+                        multiple
+                        gap={10}
+                        value={openItems}
+                        onValueChange={(e) => setOpenItems(e.value)}
+                     >
                         {paginatedArtists.map((artist) => {
-                           const name = artist.name;
-                           const albumData = artistAlbums[name];
-                           if (!albumData) return null;
-
-                           const albumEntries = Object.entries(
-                              albumData.albums,
-                           );
-                           const albumCount = albumEntries.length;
-
                            return (
-                              <Accordion.Item
-                                 key={name}
-                                 value={name}
-                                 borderWidth="1px"
-                                 borderRadius="lg"
-                                 px={4}
-                                 py={2}
-                                 mb={4}
-                              >
-                                 <Accordion.ItemTrigger>
-                                    <HStack
-                                       flex="1"
-                                       justify="space-between"
-                                       align="center"
-                                    >
-                                       <HStack gap={3}>
-                                          <Text fontWeight="semibold">
-                                             {name}
-                                          </Text>
-                                       </HStack>
-                                       <VStack gap={3} alignItems="flex-end">
-                                          <Text
-                                             fontWeight="medium"
-                                             textAlign="right"
-                                          >
-                                             {artist.playcount.toLocaleString()}{" "}
-                                             <Emoji text="🎧" />
-                                          </Text>
-                                          <Text
-                                             fontWeight="medium"
-                                             textAlign="right"
-                                          >
-                                             {albumCount} <Emoji text="💽" />
-                                          </Text>
-                                       </VStack>
-                                    </HStack>
-                                 </Accordion.ItemTrigger>
-
-                                 <Accordion.ItemContent>
-                                    <VStack align="stretch" gap={2} pt={3}>
-                                       {albumEntries
-                                          .sort(
-                                             (a, b) =>
-                                                b[1].playcount - a[1].playcount,
-                                          )
-                                          .map(([albumName, album]) => (
-                                             <HStack
-                                                key={albumName}
-                                                justify="space-between"
-                                                fontSize="sm"
-                                             >
-                                                <Text>{albumName}</Text>
-                                                <Text color="gray.500">
-                                                   {album.playcount.toLocaleString()}{" "}
-                                                   <Emoji text="🎧" />
-                                                </Text>
-                                             </HStack>
-                                          ))}
-                                    </VStack>
-                                 </Accordion.ItemContent>
-                              </Accordion.Item>
+                              <Artist
+                                 key={artist.name}
+                                 artist={artist}
+                                 artistAlbums={artistAlbums}
+                              />
                            );
                         })}
                      </Accordion.Root>
