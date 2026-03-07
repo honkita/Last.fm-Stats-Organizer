@@ -32,10 +32,15 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
       >
          <Accordion.ItemTrigger>
             <HStack flex="1" justify="space-between" align="center">
-               <HStack gap={3} flex={1} width="300px">
+               <HStack gap={1} flex={1} width="200px">
                   <ArtistName name={name} />
                </HStack>
-               <VStack gap={3} alignItems="flex-end" flexShrink={0}>
+               <VStack
+                  gap={3}
+                  alignItems="flex-end"
+                  flexShrink={0}
+                  width="fit-content"
+               >
                   {" "}
                   {/* Prevent shrinking */}
                   <Text fontWeight="medium" textAlign="right">
