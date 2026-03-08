@@ -62,8 +62,11 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
                         key={albumName}
                         justify="space-between"
                         fontSize="sm"
+                        align="start"
                      >
-                        <Text>{albumName}</Text>
+                        <Text width="80%">
+                           {albumName}
+                        </Text>
                         <Text color="gray.500">
                            {album.playcount.toLocaleString()}{" "}
                            <Emoji text="🎧" />
