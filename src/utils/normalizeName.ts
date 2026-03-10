@@ -108,6 +108,7 @@ export const normalizeAlbumFull = (name: string): string => {
          .replace(/\s*\(Deluxe(?:\s*(?:Edition|Version|Ver\.?))?\)$/i, "")
          .replace(/\s*\(Expanded(?:\s*(?:Edition|Version|Ver\.?))?\)$/i, "")
          .replace(/\s*-\s*(?:EP|Single)$/i, "")
+         .replace(/\s+(?:EP)$/i, "")
          .trim(),
    ).replace(/Version\s*\)$/i, "Ver.)");
 
