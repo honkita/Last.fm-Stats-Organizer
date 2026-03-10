@@ -20,6 +20,10 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
    const albumEntries = Object.entries(albumData.albums);
    const albumCount = albumEntries.length;
 
+   // DEBUG
+   // if (artist.playcount / albumCount < 15 && artist.playcount > 200)
+   //    console.log(artist.name, artist.playcount, albumCount);
+
    return (
       <Accordion.Item
          key={name}
@@ -64,9 +68,7 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
                         fontSize="sm"
                         align="start"
                      >
-                        <Text width="80%">
-                           {albumName}
-                        </Text>
+                        <Text width="80%">{albumName}</Text>
                         <Text color="gray.500">
                            {album.playcount.toLocaleString()}{" "}
                            <Emoji text="🎧" />
