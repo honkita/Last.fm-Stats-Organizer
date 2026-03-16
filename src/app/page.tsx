@@ -16,6 +16,7 @@ import {
    Text,
    Accordion,
    Progress,
+   HoverCard,
 } from "@chakra-ui/react";
 
 // Components
@@ -84,6 +85,7 @@ const Home = () => {
 
          setArtistAlbums(allData);
          setArtists(bestAlbums);
+
          setCurrentPage(1);
          setOpenItems([]); // Reset open items on new search
       } catch (err: unknown) {
@@ -192,13 +194,42 @@ const Home = () => {
                {!loading && !error && sortedArtists.length > 0 && (
                   <>
                      <Heading size="md">
-                        <HStack width="100%" gap={2} alignItems="flex-start">
-                           <HStack>
-                              <Emoji text="👤" /> {sortedArtists.length}
-                           </HStack>
-                           <HStack>
-                              <Emoji text="🎧" /> {scrobbles?.toLocaleString()}
-                           </HStack>
+                        <HStack width="100%" gap={6} alignItems="flex-start">
+                           {/* Artist Count */}
+                           <HoverCard.Root>
+                              <HoverCard.Trigger asChild>
+                                 <HStack cursor="help">
+                                    <Emoji text="👤" /> {sortedArtists.length}
+                                 </HStack>
+                              </HoverCard.Trigger>
+
+                              <HoverCard.Positioner>
+                                 <HoverCard.Content p={3} maxW="220px">
+                                    <Text fontSize="sm">
+                                       Total number of artists after merging.
+                                    </Text>
+                                 </HoverCard.Content>
+                              </HoverCard.Positioner>
+                           </HoverCard.Root>
+
+                           {/* Total Scrobbles */}
+                           <HoverCard.Root>
+                              <HoverCard.Trigger asChild>
+                                 <HStack cursor="help">
+                                    <Emoji text="🎧" />{" "}
+                                    {scrobbles?.toLocaleString()}
+                                 </HStack>
+                              </HoverCard.Trigger>
+
+                              <HoverCard.Positioner>
+                                 <HoverCard.Content p={3} maxW="220px">
+                                    <Text fontSize="sm">
+                                       Total number of listens (scrobbles)
+                                       recorded on your Last.fm account.
+                                    </Text>
+                                 </HoverCard.Content>
+                              </HoverCard.Positioner>
+                           </HoverCard.Root>
                         </HStack>
                      </Heading>
 
