@@ -3,6 +3,7 @@
 // React
 import { useState, useMemo } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa6";
 
 // Chakra UI
 import {
@@ -125,19 +126,34 @@ const Home = () => {
    return (
       <Box minH="100vh" py={20}>
          <Container maxW="3xl">
-            <VStack align="stretch" gap={8}>
+            <VStack align="stretch" gap={8} width="100%">
                {/* Header */}
-               <Box width="100%" textAlign="center">
+               <HStack width="100%" justify="space-between">
                   <Heading
                      size="3xl"
                      color="black"
-                     fontWeight={"Bold"}
+                     fontWeight="Bold"
                      fontFamily="var(--font-sans)"
                   >
                      <Emoji text="🎧" /> Last.fm Summarized Album Stats
                   </Heading>
-               </Box>
 
+                  <Button
+                     asChild
+                     size="lg"
+                     p={3}
+                     color="brand.primaryAccent"
+                     background="none"
+                  >
+                     <a
+                        href="https://github.com/honkita/Last.fm-Stats-Organizer"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                     >
+                        <FaGithub style={{ width: "40px", height: "40px" }} />
+                     </a>
+                  </Button>
+               </HStack>
                {/* Form */}
                <form onSubmit={handleSubmit}>
                   <HStack>
