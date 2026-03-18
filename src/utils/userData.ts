@@ -78,7 +78,8 @@ const mergeArtists = async (
 
          // Handles cases where the artist name itself contains an alias in parentheses
          const parenthesisMatch = artist.name.match(/^(.+?)\s*\((.+?)\)\s*$/);
-         if (parenthesisMatch) {
+         const isComposition = /[&,，,、＋+×]/.test(artist.name);
+         if (parenthesisMatch && !isComposition) {
             const mainName = parenthesisMatch[1].trim();
             const aliasName = parenthesisMatch[2].trim();
 
