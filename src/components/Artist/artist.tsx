@@ -81,10 +81,13 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
                               <Popover.Trigger asChild>
                                  <Button
                                     size="sm"
+                                    minH="unset"
+                                    h="auto"
+                                    px={1}
+                                    py={0}
                                     aspectRatio={1}
                                     background="transparent"
                                     _hover={{ background: "transparent" }}
-                                    p={1}
                                  >
                                     <Emoji text="🎧" />
                                  </Button>
