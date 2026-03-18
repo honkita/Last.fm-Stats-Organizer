@@ -76,6 +76,19 @@ const mergeArtists = async (
             } catch {}
          }
 
+         // Handles cases where the artist name itself contains an alias in parentheses
+         const parenthesisMatch = artist.name.match(/^(.+?)\s*\((.+?)\)\s*$/);
+         if (parenthesisMatch) {
+            const mainName = parenthesisMatch[1].trim();
+            const aliasName = parenthesisMatch[2].trim();
+
+            // Add the alias from parentheses if it's not empty
+            if (aliasName) {
+               aliases.push(aliasName);
+               aliases.push(mainName);
+            }
+         }
+
          const aliasNorm = await Promise.all(
             aliases.map((a) =>
                normalizeArtistFull(a, artist.ignoreChineseCanonization),
