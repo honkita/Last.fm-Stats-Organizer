@@ -30,7 +30,7 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
          value={name}
          borderWidth="1px"
          borderRadius="lg"
-         px={4}
+         px={3}
          py={2}
          mb={4}
       >
@@ -58,7 +58,7 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
          </Accordion.ItemTrigger>
 
          <Accordion.ItemContent>
-            <VStack align="stretch" gap={2} pt={3}>
+            <VStack align="stretch" gap={2} pt={2}>
                {albumEntries
                   .sort((a, b) => b[1].playcount - a[1].playcount)
                   .map(([albumName, album]) => (
@@ -69,7 +69,7 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
                         align="start"
                      >
                         <Text width="80%">{albumName}</Text>
-                        <Text color="gray.500">
+                        <Text color="gray.500" width="20%" textAlign="right">
                            {album.playcount.toLocaleString()}{" "}
                            <Emoji text="🎧" />
                         </Text>
