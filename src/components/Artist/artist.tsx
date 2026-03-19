@@ -1,14 +1,7 @@
-import {
-   Accordion,
-   HStack,
-   Text,
-   VStack,
-   Button,
-   Image,
-   Popover,
-   Portal,
-} from "@chakra-ui/react";
+import { Accordion, HStack, Text, VStack } from "@chakra-ui/react";
 import Emoji from "@/components/Emoji/emoji";
+
+// Child Components
 import ArtistName from "@/components/Artist/artistName";
 
 // Types
@@ -26,6 +19,10 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
 
    const albumEntries = Object.entries(albumData.albums);
    const albumCount = albumEntries.length;
+
+   // DEBUG
+   // if (artist.playcount / albumCount < 15 && artist.playcount > 200)
+   //    console.log(artist.name, artist.playcount, albumCount);
 
    return (
       <Accordion.Item
@@ -48,6 +45,8 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
                   flexShrink={0}
                   width="fit-content"
                >
+                  {" "}
+                  {/* Prevent shrinking */}
                   <Text fontWeight="medium" textAlign="right">
                      {artist.playcount.toLocaleString()} <Emoji text="🎧" />
                   </Text>
@@ -59,7 +58,7 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
          </Accordion.ItemTrigger>
 
          <Accordion.ItemContent>
-            <VStack align="stretch" gap={1} pt={2}>
+            <VStack align="stretch" gap={2} pt={2}>
                {albumEntries
                   .sort((a, b) => b[1].playcount - a[1].playcount)
                   .map(([albumName, album]) => (
@@ -69,45 +68,11 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
                         fontSize="sm"
                         align="start"
                      >
-                        <Text width="70%">{albumName}</Text>
-
-                        <HStack gap={1} width="30%" justify="flex-end">
-                           <Text color="gray.500" textAlign="right">
-                              {album.playcount.toLocaleString()}{" "}
-                           </Text>
-
-                           {/* Popover */}
-                           <Popover.Root>
-                              <Popover.Trigger asChild>
-                                 <Button
-                                    size="sm"
-                                    minH="unset"
-                                    h="auto"
-                                    px={1}
-                                    py={0}
-                                    aspectRatio={1}
-                                    background="transparent"
-                                    _hover={{ background: "transparent" }}
-                                 >
-                                    <Emoji text="🎧" />
-                                 </Button>
-                              </Popover.Trigger>
-                              <Portal>
-                                 <Popover.Positioner>
-                                    <Popover.Content>
-                                       <Popover.Arrow />
-                                       <Popover.Body>
-                                          <Image
-                                             src={album.image || ""}
-                                             alt={albumName}
-                                             width="100%"
-                                          />
-                                       </Popover.Body>
-                                    </Popover.Content>
-                                 </Popover.Positioner>
-                              </Portal>
-                           </Popover.Root>
-                        </HStack>
+                        <Text width="80%">{albumName}</Text>
+                        <Text color="gray.500" width="20%" textAlign="right">
+                           {album.playcount.toLocaleString()}{" "}
+                           <Emoji text="🎧" />
+                        </Text>
                      </HStack>
                   ))}
             </VStack>
