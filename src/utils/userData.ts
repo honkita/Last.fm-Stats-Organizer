@@ -529,6 +529,12 @@ export const getUserInfo = async (
 
       const userData = await fetchAllPages(USERNAME, LIMIT, onProgress);
 
+      if (!userData || userData.length === 0) {
+         throw new Error(
+            `Username "${USERNAME}" not found or has no recent tracks.`,
+         );
+      }
+
       const built = buildFromTracks(userData);
 
       // Split artists based on default and same name mappings
@@ -547,7 +553,7 @@ export const getUserInfo = async (
          "Best Albums": bestAlbum,
          "All Data": splitArtistList,
       };
-   } catch (err) {
-      console.error("Fetch + merge error:", err);
+   } catch {
+      throw new Error("Failed to fetch user data for " + USERNAME);
    }
 };

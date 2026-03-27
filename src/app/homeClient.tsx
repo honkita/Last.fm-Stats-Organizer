@@ -43,6 +43,8 @@ const HomeClient = () => {
       {},
    );
 
+   const [totalArtistsLoaded, setTotalArtistsLoaded] = useState(0);
+
    const [artistAlbums, setArtistAlbums] =
       useState<artistAlbumContainerMapType>({});
 
@@ -54,6 +56,8 @@ const HomeClient = () => {
 
    const [currentPage, setCurrentPage] = useState(1);
    const [scrobbles, setScrobbles] = useState<number | null>(null);
+
+   const [artistSearch, setArtistSearch] = useState("");
 
    // Track which accordion items are open
    const [openItems, setOpenItems] = useState<string[]>([]);
@@ -82,13 +86,27 @@ const HomeClient = () => {
          });
 
          const allData: artistAlbumContainerMapType = res?.["All Data"] ?? {};
-         const bestAlbums = res?.["Best Albums"] ?? {};
+         const bestAlbumsArray = res?.["Best Albums"] ?? [];
 
          setArtistAlbums(allData);
-         setArtists(bestAlbums);
+
+         // Convert array to record with artist name as key
+         const bestAlbumsRecord = Array.isArray(bestAlbumsArray)
+            ? bestAlbumsArray.reduce(
+                 (acc, artist) => {
+                    acc[artist.name] = artist;
+                    return acc;
+                 },
+                 {} as Record<string, artistAlbumTopAlbum>,
+              )
+            : {};
+
+         setArtists(bestAlbumsRecord);
 
          setCurrentPage(1);
          setOpenItems([]); // Reset open items on new search
+         setArtistSearch(""); // Reset artist search
+         setTotalArtistsLoaded(Object.keys(bestAlbumsRecord).length);
       } catch (err: unknown) {
          if (err instanceof Error) setError(err.message);
          else setError("An unknown error occurred");
@@ -115,13 +133,20 @@ const HomeClient = () => {
       return Object.values(artists).sort((a, b) => b.playcount - a.playcount);
    }, [artists]);
 
-   const totalPages = Math.ceil(sortedArtists.length / PAGE_SIZE);
+   const filteredArtists = useMemo(() => {
+      if (!artistSearch.trim()) return sortedArtists;
+      return sortedArtists.filter((a) =>
+         a.name.toLowerCase().includes(artistSearch.toLowerCase()),
+      );
+   }, [sortedArtists, artistSearch]);
+
+   const totalPages = Math.ceil(filteredArtists.length / PAGE_SIZE);
 
    const paginatedArtists = useMemo(() => {
       const start = (currentPage - 1) * PAGE_SIZE;
       const end = currentPage * PAGE_SIZE;
-      return sortedArtists.slice(start, end);
-   }, [sortedArtists, currentPage]);
+      return filteredArtists.slice(start, end);
+   }, [filteredArtists, currentPage]);
 
    return (
       <Box minH="100vh" py={20}>
@@ -154,6 +179,7 @@ const HomeClient = () => {
                      </a>
                   </Button>
                </HStack>
+
                {/* Form */}
                <form onSubmit={handleSubmit}>
                   <HStack>
@@ -210,12 +236,12 @@ const HomeClient = () => {
                {!loading && !error && sortedArtists.length > 0 && (
                   <>
                      <Heading size="md">
-                        <HStack width="100%" gap={6} alignItems="flex-start">
+                        <HStack width="100%" gap={6} alignItems="center">
                            {/* Artist Count */}
                            <HoverCard.Root>
                               <HoverCard.Trigger asChild>
                                  <HStack cursor="help">
-                                    <Emoji text="👤" /> {sortedArtists.length}
+                                    <Emoji text="👤" /> {totalArtistsLoaded}
                                  </HStack>
                               </HoverCard.Trigger>
 
@@ -246,24 +272,28 @@ const HomeClient = () => {
                                  </HoverCard.Content>
                               </HoverCard.Positioner>
                            </HoverCard.Root>
+                           {/* Artist Search */}
+                           <Input
+                              placeholder="Search artist..."
+                              value={artistSearch}
+                              onChange={(e) => setArtistSearch(e.target.value)}
+                           />
                         </HStack>
                      </Heading>
 
                      <Accordion.Root
-                        multiple
+                        collapsible
                         gap={10}
                         value={openItems}
                         onValueChange={(e) => setOpenItems(e.value)}
                      >
-                        {paginatedArtists.map((artist) => {
-                           return (
-                              <Artist
-                                 key={artist.name}
-                                 artist={artist}
-                                 artistAlbums={artistAlbums}
-                              />
-                           );
-                        })}
+                        {paginatedArtists.map((artist) => (
+                           <Artist
+                              key={artist.name}
+                              artist={artist}
+                              artistAlbums={artistAlbums}
+                           />
+                        ))}
                      </Accordion.Root>
 
                      {/* Pagination */}
