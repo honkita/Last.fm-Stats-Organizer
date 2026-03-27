@@ -1,8 +1,14 @@
 "use client";
 
 // React
-import { useState, useMemo } from "react";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { useState, useMemo, useEffect } from "react";
+import {
+   FaAngleDoubleLeft,
+   FaAngleDoubleRight,
+   FaArrowRight,
+   FaAngleLeft,
+   FaAngleRight,
+} from "react-icons/fa";
 import { FaGithub } from "react-icons/fa6";
 
 // Next.js
@@ -71,6 +77,23 @@ const HomeClient = () => {
 
    // Track which accordion items are open
    const [openItems, setOpenItems] = useState<string[]>([]);
+
+   const [pageInput, setPageInput] = useState(currentPage.toString());
+
+   useEffect(() => {
+      setPageInput(currentPage.toString());
+   }, [currentPage]);
+
+   const handlePageSubmit = (e: React.FormEvent) => {
+      e.preventDefault();
+
+      const page = Number(pageInput);
+
+      if (isNaN(page)) return;
+
+      const clampedPage = Math.max(1, Math.min(page, totalPages));
+      setCurrentPage(clampedPage);
+   };
 
    const fetchArtists = async (user: string) => {
       try {
@@ -319,25 +342,49 @@ const HomeClient = () => {
 
                      {/* Pagination */}
                      {totalPages > 1 && (
-                        <HStack justify="center" gap={6} pt={6}>
+                        <HStack justify="center" gap={3} pt={6}>
+                           {/* First Page */}
                            <Button
-                              aspectRatio="1"
+                              onClick={() => setCurrentPage(1)}
+                              disabled={currentPage === 1}
+                              size="sm"
+                              backgroundColor="brand.primaryAccent"
+                              aspectRatio={1}
+                           >
+                              <FaAngleDoubleLeft />
+                           </Button>
+
+                           {/* Previous */}
+                           <Button
                               onClick={() =>
                                  setCurrentPage((p) => Math.max(p - 1, 1))
                               }
                               disabled={currentPage === 1}
                               size="sm"
                               backgroundColor="brand.primaryAccent"
+                              aspectRatio={1}
                            >
-                              <FaArrowLeft />
+                              <FaAngleLeft />
                            </Button>
 
-                           <Text fontSize="sm">
-                              Page {currentPage} of {totalPages}
-                           </Text>
+                           {/* Page Input */}
+                           <form onSubmit={handlePageSubmit}>
+                              <HStack>
+                                 <Input
+                                    value={pageInput}
+                                    onChange={(e) =>
+                                       setPageInput(e.target.value)
+                                    }
+                                    width="70px"
+                                    textAlign="center"
+                                    {...inputStyles}
+                                 />
+                                 <Text fontSize="sm">/ {totalPages}</Text>
+                              </HStack>
+                           </form>
 
+                           {/* Next */}
                            <Button
-                              aspectRatio="1"
                               onClick={() =>
                                  setCurrentPage((p) =>
                                     Math.min(p + 1, totalPages),
@@ -346,8 +393,20 @@ const HomeClient = () => {
                               disabled={currentPage === totalPages}
                               size="sm"
                               backgroundColor="brand.primaryAccent"
+                              aspectRatio={1}
                            >
-                              <FaArrowRight />
+                              <FaAngleRight />
+                           </Button>
+
+                           {/* Last Page */}
+                           <Button
+                              onClick={() => setCurrentPage(totalPages)}
+                              disabled={currentPage === totalPages}
+                              size="sm"
+                              backgroundColor="brand.primaryAccent"
+                              aspectRatio={1}
+                           >
+                              <FaAngleDoubleRight />
                            </Button>
                         </HStack>
                      )}
