@@ -88,14 +88,47 @@ export const toHalfWidthNumbers = (input: string): string => {
    );
 };
 
+const normalizeUnicode = (str: string): string => str.normalize("NFKC");
+
 /**
  * Canonical album key (FOR MATCHING ONLY)
  */
 export const canonicalAlbumKey = (name: string): string => {
-   return normalizeAlbumFull(normalizeBrackets(toHalfWidthNumbers(name)))
+   return normalizeAlbumFull(
+      normalizeSymbols(
+         normalizeBrackets(toHalfWidthNumbers(normalizeUnicode(name))),
+      ),
+   )
       .replace(/\(\s+/g, "(")
       .replace(/\s+\)/g, ")")
       .toLowerCase();
+};
+
+export const normalizeSymbols = (str: string): string => {
+   if (!str) return str;
+
+   return (
+      str
+         // Normalize question marks
+         .replace(/[？]/g, "?")
+
+         // Normalize tildes
+         .replace(/[〜～]/g, "~")
+
+         // Normalize spacing around tildes
+         .replace(/\s*~\s*/g, "~")
+
+         // Normalize Japanese quotes to parentheses
+         .replace(/[「『【]/g, "(")
+         .replace(/[」』】]/g, ")")
+
+         // Normalize full-width spaces
+         .replace(/　/g, " ")
+
+         // Collapse whitespace
+         .replace(/\s+/g, " ")
+         .trim()
+   );
 };
 
 /**
