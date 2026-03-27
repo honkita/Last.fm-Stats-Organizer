@@ -5,6 +5,9 @@ import { useState, useMemo } from "react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa6";
 
+// Next.js
+import Link from "next/link";
+
 // Chakra UI
 import {
    Box,
@@ -36,6 +39,13 @@ import {
 const PAGE_SIZE = 100;
 
 const HomeClient = () => {
+   const inputStyles = {
+      fontFamily: "var(--font-sans)",
+      fontSize: "sm",
+      borderRadius: "md",
+      borderColor: "gray.300",
+   };
+
    const [username, setUsername] = useState("");
    const [submittedUser, setSubmittedUser] = useState<string | null>(null);
 
@@ -170,13 +180,13 @@ const HomeClient = () => {
                      color="brand.primaryAccent"
                      background="none"
                   >
-                     <a
+                     <Link
                         href="https://github.com/honkita/Last.fm-Stats-Organizer"
                         target="_blank"
                         rel="noopener noreferrer"
                      >
                         <FaGithub style={{ width: "40px", height: "40px" }} />
-                     </a>
+                     </Link>
                   </Button>
                </HStack>
 
@@ -187,6 +197,7 @@ const HomeClient = () => {
                         placeholder="Enter Last.fm username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
+                        {...inputStyles}
                      />
                      <Button
                         aspectRatio="1"
@@ -277,6 +288,7 @@ const HomeClient = () => {
                               placeholder="Search artist..."
                               value={artistSearch}
                               onChange={(e) => setArtistSearch(e.target.value)}
+                              {...inputStyles}
                            />
                         </HStack>
                      </Heading>
@@ -287,13 +299,22 @@ const HomeClient = () => {
                         value={openItems}
                         onValueChange={(e) => setOpenItems(e.value)}
                      >
-                        {paginatedArtists.map((artist) => (
-                           <Artist
-                              key={artist.name}
-                              artist={artist}
-                              artistAlbums={artistAlbums}
-                           />
-                        ))}
+                        {paginatedArtists.map((artist) => {
+                           // Find the rank relative to sortedArtists
+                           const rank =
+                              sortedArtists.findIndex(
+                                 (a) => a.name === artist.name,
+                              ) + 1;
+
+                           return (
+                              <Artist
+                                 key={artist.name}
+                                 artist={artist}
+                                 artistAlbums={artistAlbums}
+                                 rank={rank}
+                              />
+                           );
+                        })}
                      </Accordion.Root>
 
                      {/* Pagination */}

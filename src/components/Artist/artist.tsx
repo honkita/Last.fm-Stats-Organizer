@@ -8,11 +8,12 @@ import ArtistName from "@/components/Artist/artistName";
 import { artistAlbumTopAlbum, artistAlbumContainer } from "@/types/Music";
 
 interface ArtistProps {
+   rank: number;
    artist: artistAlbumTopAlbum;
    artistAlbums: Record<string, artistAlbumContainer>;
 }
 
-const Artist = ({ artist, artistAlbums }: ArtistProps) => {
+const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
    const name = artist.name;
    const albumData: artistAlbumContainer = artistAlbums[name];
    if (!albumData) return null;
@@ -37,7 +38,7 @@ const Artist = ({ artist, artistAlbums }: ArtistProps) => {
          <Accordion.ItemTrigger>
             <HStack flex="1" justify="space-between" align="center">
                <HStack gap={1} flex={1} width="200px">
-                  <ArtistName name={name} />
+                  <ArtistName name={name} rank={rank} />
                </HStack>
                <VStack
                   gap={3}

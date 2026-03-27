@@ -1,6 +1,11 @@
 import { useAccordionItemContext, Text } from "@chakra-ui/react";
 
-const ArtistName = ({ name }: { name: string }) => {
+interface ArtistNameProps {
+   name: string;
+   rank: number;
+}
+
+const ArtistName = ({ name, rank }: ArtistNameProps) => {
    const item = useAccordionItemContext();
 
    const expanded = item?.expanded;
@@ -15,7 +20,7 @@ const ArtistName = ({ name }: { name: string }) => {
          textOverflow={expanded ? "clip" : "ellipsis"}
          whiteSpace={expanded ? "normal" : "nowrap"}
       >
-         {name}
+         {rank}. {name}
       </Text>
    );
 };
