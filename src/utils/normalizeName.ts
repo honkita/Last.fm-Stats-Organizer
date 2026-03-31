@@ -3,13 +3,15 @@ import { canonicalizeName } from '@/utils/canonicalizeName';
 
 /**
  * Detects if string is predominantly CJK (Chinese/Japanese/Korean)
+ * @param name
+ * @returns
  */
-const isCJK = (str: string): boolean => {
+const isCJK = (name: string): boolean => {
   // Count CJK characters
   const cjk =
-    str.match(/[\u4E00-\u9FFF\u3040-\u30FF\u31F0-\u31FF\uFF66-\uFF9F]/g)
+    name.match(/[\u4E00-\u9FFF\u3040-\u30FF\u31F0-\u31FF\uFF66-\uFF9F]/g)
       ?.length ?? 0;
-  const non = str.replace(
+  const non = name.replace(
     /[\u4E00-\u9FFF\u3040-\u30FF\u31F0-\u31FF\uFF66-\uFF9F]/g,
     '',
   ).length;
@@ -21,17 +23,17 @@ const isCJK = (str: string): boolean => {
 
 /**
  * Normalizes commas based on if the string is Japanese/Chinese or not
- * @param str
+ * @param name
  * @returns
  */
-export const normalizeCommas = (str: string): string => {
-  if (!str) return str;
+export const normalizeCommas = (name: string): string => {
+  if (!name) return name;
 
-  const useCjkComma = isCJK(str);
+  const useCjkComma = isCJK(name);
   const targetComma = useCjkComma ? '，' : ',';
 
   // Normalize all comma variants but *preserve chosen comma style*
-  return str
+  return name
     .replace(/[\uFF0C,]\s*/g, targetComma)
     .replace(/\s*([，,])\s*/g, targetComma)
     .trim();
@@ -39,15 +41,20 @@ export const normalizeCommas = (str: string): string => {
 
 /**
  * Normalizes brackets and commas in a string, with special handling for CJK text.
+ * - Converts all types of brackets to standard parentheses ( )
+ * - Normalizes commas to either full-width (，) or half-width (,) based on whether the text is predominantly CJK
+ * - Collapses multiple spaces and trims the result
+ * @param name
+ * @returns The normalized string
  */
-export const normalizeBrackets = (str: string): string => {
-  if (!str) return str;
+export const normalizeBrackets = (name: string): string => {
+  if (!name) return name;
 
   const leftBracket = '(';
   const rightBracket = ')';
 
   // Normalize all comma variants but *preserve chosen comma style*
-  return str
+  return name
     .replace(/([【\(])/g, leftBracket)
     .replace(/([】\)])/g, rightBracket)
     .replace(/\(\s+/g, '(')
@@ -80,18 +87,37 @@ export const normalizeArtistFull = async (
 // };
 
 /**
- * Convert full-width digits (０-９) to ASCII digits (0-9)
+ * Converts full-width digits (０-９) to ASCII digits (0-9)
+ * @param name
+ * @returns
  */
-export const toHalfWidthNumbers = (input: string): string => {
-  return input.replace(/[０-９]/g, (digit) =>
+export const toHalfWidthNumbers = (name: string): string => {
+  return name.replace(/[０-９]/g, (digit) =>
     String.fromCharCode(digit.charCodeAt(0) - 0xfee0),
   );
 };
 
-const normalizeUnicode = (str: string): string => str.normalize('NFKC');
+/**
+ * Normalizes Unicode characters, including:
+ * - NFKC normalization (handles full-width, compatibility chars)
+ * - Normalizes various apostrophes to '
+ * - Normalizes various quotes to "
+ * - Collapses multiple spaces into one and trims
+ * @param s
+ * @returns
+ */
+const normalizeUnicode = (name: string) =>
+  name
+    .normalize('NFKC') // handles full-width, compatibility chars
+    .replace(/[\u2018\u2019\u201B\u2032]/g, "'") // all apostrophes → '
+    .replace(/[\u201C\u201D]/g, '"') // quotes → "
+    .replace(/\s+/g, ' ')
+    .trim();
 
 /**
  * Canonical album key (FOR MATCHING ONLY)
+ * @param name
+ * @returns
  */
 export const canonicalAlbumKey = (name: string): string => {
   return normalizeAlbumFull(
@@ -104,11 +130,16 @@ export const canonicalAlbumKey = (name: string): string => {
     .toLowerCase();
 };
 
-export const normalizeSymbols = (str: string): string => {
-  if (!str) return str;
+/**
+ * Normalizes various symbols in a string
+ * @param name
+ * @returns
+ */
+export const normalizeSymbols = (name: string): string => {
+  if (!name) return name;
 
   return (
-    str
+    name
       // Normalize question marks
       .replace(/[？]/g, '?')
 
@@ -133,6 +164,11 @@ export const normalizeSymbols = (str: string): string => {
 
 /**
  * Full album name normalization
+ * - Removes common edition tags like (Deluxe Edition), (Video Version), - EP, etc.
+ * - Normalizes brackets and commas
+ * - Converts full-width numbers to half-width
+ * @param name
+ * @returns
  */
 export const normalizeAlbumFull = (name: string): string => {
   const normalized = normalizeBrackets(
@@ -151,13 +187,14 @@ export const normalizeAlbumFull = (name: string): string => {
 
 /**
  * Remove any spaces between two Chinese/Japanese characters
- * @param str
+ * @param name
+ * @return
  */
-export const normalizeSpaces = (str: string): string => {
-  if (!str) return str;
+export const normalizeSpaces = (name: string): string => {
+  if (!name) return name;
 
   // Remove spaces between two CJK characters
-  return str.replace(
+  return name.replace(
     /([\u4E00-\u9FFF\u3040-\u30FF\u31F0-\u31FF\uFF66-\uFF9F])\s+([\u4E00-\u9FFF\u3040-\u30FF\u31F0-\u31FF\uFF66-\uFF9F])/g,
     '$1$2',
   );
@@ -165,7 +202,7 @@ export const normalizeSpaces = (str: string): string => {
 
 /**
  * Normalizes seiyuu CV patterns to (CV.NAME)
- * @param str
+ * @param name
  * @returns
  */
 /**
@@ -182,11 +219,11 @@ export const normalizeSpaces = (str: string): string => {
  * - Normalizes CV patterns to (CV.NAME)
  * - Ensures EXACTLY ONE space before "(" when there is preceding text
  */
-export const normalizeCV = (str: string): string => {
-  if (!str) return str;
+export const normalizeCV = (name: string): string => {
+  if (!name) return name;
 
   // Normalize CJK brackets to ASCII () so regex is simpler
-  const normalized = str
+  const normalized = name
     .replace(/[（【「『《]/g, '(')
     .replace(/[）】」』》]/g, ')');
 

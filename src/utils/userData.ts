@@ -206,6 +206,42 @@ const mergeArtists = async (
   return merged;
 };
 
+const normalizeForDistance = (s: string) =>
+  s.replace(/[^a-z0-9]/gi, '').toLowerCase();
+
+const levenshtein = (a: string, b: string): number => {
+  const dp = Array.from({ length: a.length + 1 }, () =>
+    Array(b.length + 1).fill(0),
+  );
+
+  for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+  for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+
+  for (let i = 1; i <= a.length; i++) {
+    for (let j = 1; j <= b.length; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+
+      dp[i][j] = Math.min(
+        dp[i - 1][j] + 1,
+        dp[i][j - 1] + 1,
+        dp[i - 1][j - 1] + cost,
+      );
+    }
+  }
+
+  return dp[a.length][b.length];
+};
+
+const similarityScore = (a: string, b: string): number => {
+  const na = normalizeForDistance(a);
+  const nb = normalizeForDistance(b);
+
+  if (!na.length || !nb.length) return 0;
+
+  const dist = levenshtein(na, nb);
+  return 1 - dist / Math.max(na.length, nb.length);
+};
+
 /**
  * Normalizes albums and groups based on aliases
  * @param mergedAlbumArtists
@@ -216,81 +252,76 @@ const albumNormalization = async (
   mergedAlbumArtists: artistAlbumContainerMapType,
   lfmAlbumMap: Record<string, Record<string, string[]>>,
 ): Promise<artistAlbumContainerMapType> => {
-  for (const [artistName, albums] of Object.entries(lfmAlbumMap)) {
-    // Construct alias maps
+  for (const [artistName, artistData] of Object.entries(mergedAlbumArtists)) {
+    const albums = artistData.albums;
+
+    // Build alias map for this artist
     const aliasMap: Record<string, string> = {};
 
-    for (const albumName of Object.keys(albums)) {
-      const aliasNorms = albums[albumName];
-      aliasNorms.forEach((a) => {
-        aliasMap[canonicalAlbumKey(a)] = normalizeAlbumFull(albumName);
+    const dbAlbums = lfmAlbumMap[artistName] || {};
+
+    for (const [albumName, aliasList] of Object.entries(dbAlbums)) {
+      const normalized = normalizeAlbumFull(albumName);
+
+      aliasList.forEach((alias) => {
+        aliasMap[canonicalAlbumKey(alias)] = normalized;
       });
 
-      // Add album name itself to the alias map
-      if (albumName.toLowerCase() != albumName) {
-        aliasMap[canonicalAlbumKey(albumName)] = normalizeAlbumFull(albumName);
-      }
+      aliasMap[canonicalAlbumKey(albumName)] = normalized;
     }
 
-    // Iterate through mergedAlbumArtists to normalize albums
-    for (const [oldName, normalizedName] of Object.entries(aliasMap)) {
-      // If the old album name exists in the artist's albums
-      try {
-        if (mergedAlbumArtists[artistName]['albums'][oldName]) {
-          mergedAlbumArtists[artistName]['albums'][normalizedName] = {
-            playcount:
-              Number(
-                mergedAlbumArtists[artistName]['albums'][oldName].playcount,
-              ) +
-              Number(
-                mergedAlbumArtists[artistName]['albums'][normalizedName]
-                  ?.playcount ?? 0,
-              ),
-            image:
-              mergedAlbumArtists[artistName]['albums'][normalizedName]?.image ??
-              mergedAlbumArtists[artistName]['albums'][oldName].image ??
-              '',
-          };
-
-          // Remove the old album entry
-          if (oldName !== normalizedName) {
-            delete mergedAlbumArtists[artistName]['albums'][oldName];
-          } else {
-          }
-        } else {
-          let mainName: string | undefined = aliasMap[oldName];
-
-          if (!mainName) {
-            const asciiLower = (str: string) =>
-              str.replace(/[A-Za-z]/g, (c) => c.toLowerCase());
-            const canonAscii = asciiLower(oldName);
-            for (const dbCanon of Object.keys(albums)) {
-              if (asciiLower(dbCanon).includes(canonAscii)) {
-                mainName = aliasMap[dbCanon];
-                break;
-              }
-            }
-          }
-        }
-      } catch {
-        // If the album does not exit for this artist, skip for now
-        // Because some artists participate in albums, but I don't listen to the songs
-      }
-    }
-  }
-
-  // Fix the album titles using the name mapping
-  for (const [artistName, data] of Object.entries(mergedAlbumArtists)) {
     const updatedAlbums: artistCleanAlbumsMapType = {};
 
-    for (const [albumName, albumData] of Object.entries(data.albums)) {
-      // If this album came from DB normalization, keep it as-is
-      // Only fallback to original casing if it was never normalized
-      const mappedName = lfmAlbumMap[artistName]?.[albumName]
-        ? albumName
-        : nonNormalizedAlbumNames[albumName] || albumName;
+    for (const [albumKey, albumData] of Object.entries(albums)) {
+      let targetName: string | undefined;
 
-      updatedAlbums[mappedName] = albumData;
+      // 1. Exact alias match
+      if (aliasMap[albumKey]) {
+        targetName = aliasMap[albumKey];
+      } else {
+        // 2. Levenshtein fallback ONLY if no alias matc
+
+        const DISTANCE_THRESHOLD = 3;
+        const SIMILARITY_THRESHOLD = 0.82; // tune: 0.8–0.9 typical
+
+        let bestMatch: string | null = null;
+        let bestDistance = Infinity;
+        let bestSimilarity = 0;
+
+        for (const aliasKey of Object.keys(aliasMap)) {
+          const dist = levenshtein(albumKey, aliasKey);
+          const sim = similarityScore(albumKey, aliasKey);
+
+          // prioritize similarity first, then distance as tiebreaker
+          if (
+            sim > bestSimilarity ||
+            (sim === bestSimilarity && dist < bestDistance)
+          ) {
+            bestSimilarity = sim;
+            bestDistance = dist;
+            bestMatch = aliasKey;
+          }
+        }
+
+        // STRICT merge condition
+        if (
+          bestMatch &&
+          bestDistance <= DISTANCE_THRESHOLD &&
+          bestSimilarity >= SIMILARITY_THRESHOLD
+        ) {
+          targetName = aliasMap[bestMatch];
+        }
+      }
+
+      // 4. Merge OR keep original
+      const finalName =
+        targetName || nonNormalizedAlbumNames[albumKey] || albumKey;
+
+      updatedAlbums[finalName] = {
+        playcount:
+          (updatedAlbums[finalName]?.playcount ?? 0) + albumData.playcount,
+        image: updatedAlbums[finalName]?.image || albumData.image,
+      };
     }
 
     mergedAlbumArtists[artistName].albums = updatedAlbums;
