@@ -74,7 +74,6 @@ const HomeClient = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
 
-  const [prevPage, setPrevPage] = useState(1);
   const [scrobbles, setScrobbles] = useState<number | null>(null);
 
   const [artistSearch, setArtistSearch] = useState('');
@@ -179,7 +178,6 @@ const HomeClient = () => {
     setArtists({});
     setArtistAlbums({});
     setCurrentPage(1);
-    setPrevPage(1);
 
     const trimmedUser = username.trim();
     setSubmittedUser(trimmedUser);
