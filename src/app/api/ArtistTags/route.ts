@@ -2,7 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 /**
- * Gets the artist tags from the database and stores them in a global variable for caching.
+ * Gets the artist tags from the database
  * @returns
  */
 const GET = async (): Promise<NextResponse<Record<string, string[]>>> => {
