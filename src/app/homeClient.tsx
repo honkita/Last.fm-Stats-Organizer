@@ -72,6 +72,8 @@ const HomeClient = () => {
   const [totalPagesLoading, setTotalPagesLoading] = useState(0);
 
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [prevPage, setPrevPage] = useState(1);
   const [scrobbles, setScrobbles] = useState<number | null>(null);
 
   const [artistSearch, setArtistSearch] = useState('');
@@ -157,6 +159,8 @@ const HomeClient = () => {
     setProgress(0);
     setArtists({});
     setArtistAlbums({});
+    setCurrentPage(1);
+    setPrevPage(1);
 
     const trimmedUser = username.trim();
     setSubmittedUser(trimmedUser);
@@ -168,11 +172,18 @@ const HomeClient = () => {
   }, [artists]);
 
   const filteredArtists = useMemo(() => {
-    if (!artistSearch.trim()) return sortedArtists;
+    if (!artistSearch.trim()) {
+      return sortedArtists;
+    }
+
+    // Reset the page to 1 when a new search is made
+    if (prevPage !== 1) setPrevPage(currentPage);
+    setCurrentPage(1);
+
     return sortedArtists.filter((a) =>
       a.name.toLowerCase().includes(artistSearch.toLowerCase()),
     );
-  }, [sortedArtists, artistSearch]);
+  }, [sortedArtists, artistSearch, prevPage, currentPage]);
 
   const totalPages = Math.ceil(filteredArtists.length / PAGE_SIZE);
 
