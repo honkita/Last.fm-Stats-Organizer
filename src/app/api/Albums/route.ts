@@ -1,5 +1,5 @@
-import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { prisma } from '@/lib/prisma';
+import { NextResponse } from 'next/server';
 
 const dbAlbums: Record<number, string> = {};
 
@@ -8,13 +8,13 @@ const dbAlbums: Record<number, string> = {};
  * @returns
  */
 const GET = async () => {
-   const albums = await prisma.album.findMany({
-      select: { id: true, name: true },
-   });
-   for (const album of albums) {
-      dbAlbums[album.id] = album.name;
-   }
-   return NextResponse.json(dbAlbums);
+  const albums = await prisma.album.findMany({
+    select: { id: true, name: true },
+  });
+  for (const album of albums) {
+    dbAlbums[album.id] = album.name;
+  }
+  return NextResponse.json(dbAlbums);
 };
 
 export { GET };

@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
-import { NextResponse } from "next/server";
+import { prisma } from '@/lib/prisma';
+import { NextResponse } from 'next/server';
 
 // Types
-import type { Artist } from "@prisma/client";
+import type { Artist } from '@prisma/client';
 
 const dbArtists: Record<string, Artist> = {};
 
@@ -11,12 +11,12 @@ const dbArtists: Record<string, Artist> = {};
  * @returns
  */
 const GET = async () => {
-   const artists = await prisma.artist.findMany();
-   for (const artist of artists) {
-      dbArtists[artist.name] = artist;
-   }
+  const artists = await prisma.artist.findMany();
+  for (const artist of artists) {
+    dbArtists[artist.name] = artist;
+  }
 
-   return NextResponse.json(dbArtists);
+  return NextResponse.json(dbArtists);
 };
 
 export { GET };

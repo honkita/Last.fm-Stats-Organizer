@@ -1,2 +1,2 @@
-declare module "/*.json";
-declare module "@/*";
+declare module '/*.json';
+declare module '@/*';

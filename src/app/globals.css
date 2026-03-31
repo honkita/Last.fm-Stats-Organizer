@@ -1,26 +1,26 @@
-@import url("https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap");
-@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Noto+Emoji:wght@300..700&display=swap');
+@import 'tailwindcss';
 
 :root {
-   --background: #ffffff;
-   --foreground: #171717;
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 @theme inline {
-   --color-background: var(--background);
-   --color-foreground: var(--foreground);
-   --font-sans: "Nunito", sans-serif;
-   --font-emoji: "Noto Emoji", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: 'Nunito', sans-serif;
+  --font-emoji: 'Noto Emoji', sans-serif;
 }
 
 .emoji {
-   font-family: var(--font-emoji);
-   color: #f38500;
+  font-family: var(--font-emoji);
+  color: #f38500;
 }
 
 body {
-   background: var(--background);
-   color: var(--foreground);
-   font-family: var(--font-sans);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
 }

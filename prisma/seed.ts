@@ -1,18 +1,18 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 const main = async () => {
   const data: Record<string, string[]> = {
-    "Utada Hikaru": ["宇多田ヒカル", "Hikaru Utada"],
-    林憶蓮: ["Sandy Lam", "Lam Yik Lin"],
-    ヨルシカ: ["Yorushika"],
-    "i-dle": ["(G)I-DLE"],
-    優里: ["Yuuri"],
-    Ailee: ["에일리"],
-    "MILGRAM カズイ (CV: 竹内良太)": ["カズイ (CV: 竹内良太)"],
-    GFRIEND: ["여자친구"],
-    Soojin: ["수진"],
+    'Utada Hikaru': ['宇多田ヒカル', 'Hikaru Utada'],
+    林憶蓮: ['Sandy Lam', 'Lam Yik Lin'],
+    ヨルシカ: ['Yorushika'],
+    'i-dle': ['(G)I-DLE'],
+    優里: ['Yuuri'],
+    Ailee: ['에일리'],
+    'MILGRAM カズイ (CV: 竹内良太)': ['カズイ (CV: 竹内良太)'],
+    GFRIEND: ['여자친구'],
+    Soojin: ['수진'],
   };
 
   for (const [artist, aliases] of Object.entries(data)) {
@@ -34,7 +34,7 @@ const main = async () => {
 
 main()
   .catch((err) => {
-    console.error("Seeding failed:", err);
+    console.error('Seeding failed:', err);
   })
   .finally(async () => {
     await prisma.$disconnect();

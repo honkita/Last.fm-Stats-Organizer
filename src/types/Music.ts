@@ -1,52 +1,52 @@
-import type { Artist as DBArtist } from "@prisma/client";
+import type { Artist as DBArtist } from '@prisma/client';
 
 /**
  * Merged Artist Interface
  */
 interface Artist {
-   id: number | -1;
-   playcount: number;
-   ignoreChinese: boolean;
+  id: number | -1;
+  playcount: number;
+  ignoreChinese: boolean;
 }
 
 /**
  * Database Album Interface (Cleaned)
  */
 export interface DBAlbumClean {
-   name: string;
-   aliases: string[];
+  name: string;
+  aliases: string[];
 }
 
 /**
  * Cleaned Albums Interface
  */
 interface cleanedAlbums {
-   playcount: number;
-   image: string;
+  playcount: number;
+  image: string;
 }
 
 /**
  * Artist Album Container Interface
  */
 export interface artistAlbumContainer extends Artist {
-   albums: Record<string, cleanedAlbums>;
+  albums: Record<string, cleanedAlbums>;
 }
 
 /**
  * Artist Top Album Interface
  */
 export type artistAlbumTopAlbum = Artist & {
-   name: string;
-   albumName: string;
-   topAlbumImage: string;
+  name: string;
+  albumName: string;
+  topAlbumImage: string;
 };
 
 /**
  * Same Artist Values Interface
  */
 export interface sameArtistValues {
-   default: string;
-   splits: Record<string, { albumNames: string[] }>;
+  default: string;
+  splits: Record<string, { albumNames: string[] }>;
 }
 
 /**

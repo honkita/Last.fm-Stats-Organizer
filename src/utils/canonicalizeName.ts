@@ -1,4 +1,4 @@
-import * as OpenCC from "opencc-js";
+import * as OpenCC from 'opencc-js';
 
 /**
  * Manual override map
@@ -9,7 +9,7 @@ const manualMap: Record<string, string> = {};
  * CJK detection ranges (Chinese, Japanese, Korean) with Unicode
  */
 const CJK_REGEX =
-   /[\u4E00-\u9FFF\u3040-\u30FF\u31F0-\u31FF\u3400-\u4DBF\uF900-\uFAFF]/;
+  /[\u4E00-\u9FFF\u3040-\u30FF\u31F0-\u31FF\u3400-\u4DBF\uF900-\uFAFF]/;
 
 /**
  * Returns true if the text contains any Chinese characters.
@@ -17,7 +17,7 @@ const CJK_REGEX =
  * @returns
  */
 export const isChinese = (text: string): boolean => {
-   return /[\u4E00-\u9FFF]/.test(text);
+  return /[\u4E00-\u9FFF]/.test(text);
 };
 
 /**
@@ -27,7 +27,7 @@ export const isChinese = (text: string): boolean => {
  * @returns
  */
 export const isJapanese = (text: string): boolean => {
-   return /[\u3040-\u30FF]/.test(text);
+  return /[\u3040-\u30FF]/.test(text);
 };
 
 /**
@@ -36,12 +36,12 @@ export const isJapanese = (text: string): boolean => {
  * @returns
  */
 export const removeCJKInnerSpaces = (text: string): string => {
-   return text.replace(/(\S)\s+(\S)/g, (match, left, right) => {
-      if (CJK_REGEX.test(left) && CJK_REGEX.test(right)) {
-         return left + right;
-      }
-      return match;
-   });
+  return text.replace(/(\S)\s+(\S)/g, (match, left, right) => {
+    if (CJK_REGEX.test(left) && CJK_REGEX.test(right)) {
+      return left + right;
+    }
+    return match;
+  });
 };
 
 /**
@@ -51,56 +51,56 @@ export const removeCJKInnerSpaces = (text: string): string => {
  * @returns
  */
 export const canonicalizeName = (
-   rawName: string,
-   opts?: { skipChineseConversion?: boolean },
+  rawName: string,
+  opts?: { skipChineseConversion?: boolean },
 ): string => {
-   let normalized = removeCJKInnerSpaces(rawName);
+  let normalized = removeCJKInnerSpaces(rawName);
 
-   const skipChineseConversion = !!opts?.skipChineseConversion;
+  const skipChineseConversion = !!opts?.skipChineseConversion;
 
-   // Only apply OpenCC when the string only contains Chinese characters and does not have the canonize field set to skip.
-   if (
-      isChinese(normalized) &&
-      !isJapanese(normalized) &&
-      !skipChineseConversion
-   ) {
-      try {
-         // Traditional -> Simplified
-         const converter = OpenCC.Converter({ from: "t", to: "cn" });
-         normalized = converter(normalized);
-      } catch (e) {
-         // Warn about conversion failure
-         console.warn("OpenCC conversion failed:", normalized, e);
-      }
-   }
+  // Only apply OpenCC when the string only contains Chinese characters and does not have the canonize field set to skip.
+  if (
+    isChinese(normalized) &&
+    !isJapanese(normalized) &&
+    !skipChineseConversion
+  ) {
+    try {
+      // Traditional -> Simplified
+      const converter = OpenCC.Converter({ from: 't', to: 'cn' });
+      normalized = converter(normalized);
+    } catch (e) {
+      // Warn about conversion failure
+      console.warn('OpenCC conversion failed:', normalized, e);
+    }
+  }
 
-   // Apply Japanese manual map if applicable
-   if (isJapanese(normalized)) {
-      normalized = manualMap[normalized] || normalized;
-   }
+  // Apply Japanese manual map if applicable
+  if (isJapanese(normalized)) {
+    normalized = manualMap[normalized] || normalized;
+  }
 
-   // Global manual map override
-   normalized = manualMap[normalized] || normalized;
+  // Global manual map override
+  normalized = manualMap[normalized] || normalized;
 
-   return normalized;
+  return normalized;
 };
 
 export const simplifiedToTraditional = (text: string): string => {
-   try {
-      const converter = OpenCC.Converter({ from: "cn", to: "t" });
-      return converter(text);
-   } catch (e) {
-      console.warn("OpenCC conversion failed:", text, e);
-      return text;
-   }
+  try {
+    const converter = OpenCC.Converter({ from: 'cn', to: 't' });
+    return converter(text);
+  } catch (e) {
+    console.warn('OpenCC conversion failed:', text, e);
+    return text;
+  }
 };
 
 export const traditionalToSimplified = (text: string): string => {
-   try {
-      const converter = OpenCC.Converter({ from: "t", to: "cn" });
-      return converter(text);
-   } catch (e) {
-      console.warn("OpenCC conversion failed:", text, e);
-      return text;
-   }
+  try {
+    const converter = OpenCC.Converter({ from: 't', to: 'cn' });
+    return converter(text);
+  } catch (e) {
+    console.warn('OpenCC conversion failed:', text, e);
+    return text;
+  }
 };

@@ -1,15 +1,15 @@
 // Client Component
-import HomeClient from "./homeClient";
+import HomeClient from './homeClient';
 
 // Types
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-   title: "Last.fm Enhanced Statistics",
+  title: 'Last.fm Enhanced Statistics',
 };
 
 const Home = () => {
-   return <HomeClient />;
+  return <HomeClient />;
 };
 
 export default Home;
