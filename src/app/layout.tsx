@@ -1,4 +1,7 @@
+// Chakra UI
 import { ChakraUIProvider } from '@/components/ui/provider';
+
+// CSS
 import './globals.css';
 
 const Layout = ({ children }: { children: React.ReactNode }) => {

@@ -1,5 +1,7 @@
+// Chakra UI
 import { useAccordionItemContext, Text } from '@chakra-ui/react';
 
+// Props Types
 interface ArtistNameProps {
   name: string;
   rank: number;

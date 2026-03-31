@@ -52,12 +52,13 @@ const HomeClient = () => {
     borderColor: 'gray.300',
   };
 
+  type ArtistWithSearch = artistAlbumTopAlbum & {
+    searchBlob: string;
+  };
   const [username, setUsername] = useState('');
   const [submittedUser, setSubmittedUser] = useState<string | null>(null);
 
-  const [artists, setArtists] = useState<Record<string, artistAlbumTopAlbum>>(
-    {},
-  );
+  const [artists, setArtists] = useState<Record<string, ArtistWithSearch>>({});
 
   const [totalArtistsLoaded, setTotalArtistsLoaded] = useState(0);
 
@@ -103,19 +104,22 @@ const HomeClient = () => {
       setLoading(true);
       setError(null);
 
+      // Fetch scrobbles (unchanged)
       try {
         const res = await fetch('/api/Scrobbles?user=' + user);
         if (!res.ok) throw new Error('Failed to fetch scrobbles');
         const data = await res.json();
         setScrobbles(data.totalScrobbles);
       } catch (err) {
-        console.log(
-          'Fetching user info for:',
-          user + ' failed, error fetching scrobbles:',
-          err,
-        );
+        console.log('Scrobble fetch failed:', err);
       }
 
+      // ✅ Fetch tags
+      const tagRes = await fetch('/api/ArtistTags');
+      if (!tagRes.ok) throw new Error('Failed to fetch artist tags');
+      const tagMap: Record<string, string[]> = await tagRes.json();
+
+      // Main data
       const res = await getUserInfo(user, (current, total) => {
         setProgress(current);
         setTotalPagesLoading(total);
@@ -126,22 +130,37 @@ const HomeClient = () => {
 
       setArtistAlbums(allData);
 
-      // Convert array to record with artist name as key
-      const bestAlbumsRecord = Array.isArray(bestAlbumsArray)
+      // ✅ Build searchBlob ONCE
+      const bestAlbumsRecord: Record<string, ArtistWithSearch> = Array.isArray(
+        bestAlbumsArray,
+      )
         ? bestAlbumsArray.reduce(
             (acc, artist) => {
-              acc[artist.name] = artist;
+              const rawTags = tagMap[artist.name] || [];
+
+              const searchBlob = (
+                rawTags.join(' ') +
+                ' ' +
+                artist.name
+              ).toLowerCase();
+
+              acc[artist.name] = {
+                ...artist,
+                searchBlob,
+              };
+
               return acc;
             },
-            {} as Record<string, artistAlbumTopAlbum>,
+            {} as Record<string, ArtistWithSearch>,
           )
         : {};
 
       setArtists(bestAlbumsRecord);
 
+      // Reset UI state
       setCurrentPage(1);
-      setOpenItems([]); // Reset open items on new search
-      setArtistSearch(''); // Reset artist search
+      setOpenItems([]);
+      setArtistSearch('');
       setTotalArtistsLoaded(Object.keys(bestAlbumsRecord).length);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
@@ -172,18 +191,14 @@ const HomeClient = () => {
   }, [artists]);
 
   const filteredArtists = useMemo(() => {
-    if (!artistSearch.trim()) {
-      return sortedArtists;
-    }
+    if (!artistSearch.trim()) return sortedArtists;
 
-    // Reset the page to 1 when a new search is made
-    if (prevPage !== 1) setPrevPage(currentPage);
-    setCurrentPage(1);
+    const terms = artistSearch.toLowerCase().split(/\s+/).filter(Boolean);
 
-    return sortedArtists.filter((a) =>
-      a.name.toLowerCase().includes(artistSearch.toLowerCase()),
+    return sortedArtists.filter((artist) =>
+      terms.every((term) => artist.searchBlob.includes(term)),
     );
-  }, [sortedArtists, artistSearch, prevPage, currentPage]);
+  }, [sortedArtists, artistSearch]);
 
   const totalPages = Math.ceil(filteredArtists.length / PAGE_SIZE);
 
@@ -337,7 +352,6 @@ const HomeClient = () => {
                   // Find the rank relative to sortedArtists
                   const rank =
                     sortedArtists.findIndex((a) => a.name === artist.name) + 1;
-
                   return (
                     <Artist
                       key={artist.name}

@@ -1,12 +1,14 @@
+// Chakra UI
 import { Accordion, HStack, Text, VStack } from '@chakra-ui/react';
-import Emoji from '@/components/Emoji/emoji';
 
 // Child Components
 import ArtistName from '@/components/Artist/artistName';
+import Emoji from '@/components/Emoji/emoji';
 
 // Types
 import { artistAlbumTopAlbum, artistAlbumContainer } from '@/types/Music';
 
+// Props Types
 interface ArtistProps {
   rank: number;
   artist: artistAlbumTopAlbum;

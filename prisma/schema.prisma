@@ -14,6 +14,7 @@ model Artist {
   ignoreChineseCanonization Boolean       @default(false)
   ArtistAlbums              ArtistAlbum[]
   SameNames                 SameNames[]
+  ArtistTags                ArtistTag[]
 }
 
 model Album {
@@ -33,7 +34,6 @@ model ArtistAlbum {
   @@id([artistId, albumId])
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model SameNames {
   id        Int     @id @default(autoincrement())
   groupID   Int
@@ -43,4 +43,20 @@ model SameNames {
   Artist    Artist  @relation(fields: [groupID], references: [id], onDelete: NoAction)
 
   @@index([groupID, name])
+}
+
+model Tag {
+  id         Int         @id @default(autoincrement())
+  name       String      @unique
+  ArtistTags ArtistTag[]
+}
+
+model ArtistTag {
+  artistId Int
+  tagId    Int
+
+  Artist Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  Tag    Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([artistId, tagId])
 }
