@@ -55,7 +55,9 @@ model Tag {
   id   Int    @id @default(autoincrement())
   name String @unique
 
-  ArtistTags ArtistTag[]
+  ArtistTags      ArtistTag[]
+  parentRelations TagHierarchy[] @relation("ChildTag")
+  childRelations  TagHierarchy[] @relation("ParentTag")
 }
 
 model ArtistTag {
@@ -75,4 +77,18 @@ model ArtistTag {
   @@unique([artistId, tagId])
   @@index([artistId])
   @@index([sameNamesId])
+}
+
+model TagHierarchy {
+  id Int @id @default(autoincrement())
+
+  parentTagId Int
+  childTagId  Int
+
+  parentTag Tag @relation("ParentTag", fields: [parentTagId], references: [id], onDelete: Cascade)
+  childTag  Tag @relation("ChildTag", fields: [childTagId], references: [id], onDelete: Cascade)
+
+  @@unique([parentTagId, childTagId])
+  @@index([parentTagId])
+  @@index([childTagId])
 }

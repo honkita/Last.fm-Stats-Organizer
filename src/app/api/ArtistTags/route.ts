@@ -2,47 +2,62 @@ import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 /**
- * Gets the artist tags from the database
- * Returns both global and split tags
+ * Gets the artist tags + hierarchy
+ * Returns:
+ * - tagMap (artist -> tags)
+ * - tagHierarchy (parent-child relationships)
  */
 const GET = async (): Promise<NextResponse> => {
-  // Fetch all artist tags with Tag info
-  const dbArtistTags = await prisma.artistTag.findMany({
-    include: {
-      Artist: {
-        select: {
-          name: true,
+  try {
+    // 1. Fetch artist tags
+    const dbArtistTags = await prisma.artistTag.findMany({
+      include: {
+        Artist: {
+          select: { name: true },
         },
-      },
-      SameNames: {
-        select: {
-          name: true,
+        SameNames: {
+          select: { name: true },
         },
+        Tag: true,
       },
-      Tag: true,
-    },
-  });
+    });
 
-  // Build structured map
-  const result: Record<
-    string, // artistName
-    string[]
-  > = {};
+    // 2. Fetch tag hierarchy
+    const dbHierarchy = await prisma.tagHierarchy.findMany({
+      include: {
+        parentTag: { select: { name: true } },
+        childTag: { select: { name: true } },
+      },
+    });
 
-  for (const at of dbArtistTags) {
-    const artistName = at.SameNames?.name || at.Artist.name;
-    const tagName = at.Tag.name;
+    // 3. Build artist -> tags map
+    const tagMap: Record<string, string[]> = {};
 
-    if (!result[artistName]) {
-      result[artistName] = [];
+    for (const at of dbArtistTags) {
+      const artistName = at.SameNames?.name || at.Artist.name;
+      const tagName = at.Tag.name;
+
+      if (!tagMap[artistName]) {
+        tagMap[artistName] = [];
+      }
+
+      tagMap[artistName].push(tagName);
     }
 
-    result[artistName].push(tagName);
+    // 4. Build hierarchy list
+    const tagHierarchy = dbHierarchy.map((h) => ({
+      parentTag: h.parentTag.name,
+      childTag: h.childTag.name,
+    }));
+
+    return NextResponse.json({
+      tagMap,
+      tagHierarchy,
+    });
+  } catch (err) {
+    console.error('ArtistTags API error:', err);
+    return new NextResponse('Failed to fetch artist tags', { status: 500 });
   }
-
-  console.log(result);
-
-  return NextResponse.json(result);
 };
 
 export { GET };

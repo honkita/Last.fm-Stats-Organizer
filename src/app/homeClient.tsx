@@ -103,7 +103,9 @@ const HomeClient = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch scrobbles (unchanged)
+      // -----------------------------
+      // 1. Fetch scrobbles (unchanged)
+      // -----------------------------
       try {
         const res = await fetch('/api/Scrobbles?user=' + user);
         if (!res.ok) throw new Error('Failed to fetch scrobbles');
@@ -113,11 +115,75 @@ const HomeClient = () => {
         console.log('Scrobble fetch failed:', err);
       }
 
+      // -----------------------------
+      // 2. Fetch tags + hierarchy
+      // -----------------------------
       const tagRes = await fetch('/api/ArtistTags');
       if (!tagRes.ok) throw new Error('Failed to fetch artist tags');
-      const tagMap: Record<string, string[]> = await tagRes.json();
 
-      // Main data
+      const {
+        tagMap: rawTagMap,
+        tagHierarchy,
+      }: {
+        tagMap: Record<string, string[]>;
+        tagHierarchy: { parentTag: string; childTag: string }[];
+      } = await tagRes.json();
+
+      // -----------------------------
+      // 3. Build parent adjacency map
+      // -----------------------------
+      const parentMap: Record<string, string[]> = {};
+
+      for (const { parentTag, childTag } of tagHierarchy) {
+        if (!parentMap[childTag]) parentMap[childTag] = [];
+        parentMap[childTag].push(parentTag);
+      }
+
+      // -----------------------------
+      // 4. Resolve full tag hierarchy (cached DFS)
+      // -----------------------------
+      const cache: Record<string, Set<string>> = {};
+
+      const resolveTag = (tag: string): Set<string> => {
+        if (cache[tag]) return cache[tag];
+
+        const visited = new Set<string>();
+        const stack = [tag];
+
+        while (stack.length) {
+          const current = stack.pop()!;
+          if (visited.has(current)) continue;
+
+          visited.add(current);
+
+          const parents = parentMap[current] || [];
+          for (const p of parents) {
+            stack.push(p);
+          }
+        }
+
+        cache[tag] = visited;
+        return visited;
+      };
+
+      // -----------------------------
+      // 5. Expand artist tags
+      // -----------------------------
+      const expandedTagMap: Record<string, string[]> = {};
+
+      for (const [artist, tags] of Object.entries(rawTagMap)) {
+        const fullSet = new Set<string>();
+
+        for (const tag of tags) {
+          resolveTag(tag).forEach((t) => fullSet.add(t));
+        }
+
+        expandedTagMap[artist] = Array.from(fullSet);
+      }
+
+      // -----------------------------
+      // 6. Fetch main data
+      // -----------------------------
       const res = await getUserInfo(user, (current, total) => {
         setProgress(current);
         setTotalPagesLoading(total);
@@ -128,19 +194,20 @@ const HomeClient = () => {
 
       setArtistAlbums(allData);
 
-      // ✅ Build searchBlob ONCE
+      // -----------------------------
+      // 7. Build artists with searchBlob
+      // -----------------------------
       const bestAlbumsRecord: Record<string, ArtistWithSearch> = Array.isArray(
         bestAlbumsArray,
       )
         ? bestAlbumsArray.reduce(
             (acc, artist) => {
-              const rawTags = tagMap[artist.name] || [];
+              const rawTags = expandedTagMap[artist.name] || [];
 
-              const searchBlob = (
-                rawTags.join(' ') +
-                ' ' +
-                artist.name
-              ).toLowerCase();
+              // Deduplicated + includes inherited tags
+              const searchBlob = [...new Set([...rawTags, artist.name])]
+                .join(' ')
+                .toLowerCase();
 
               acc[artist.name] = {
                 ...artist,
@@ -155,7 +222,9 @@ const HomeClient = () => {
 
       setArtists(bestAlbumsRecord);
 
-      // Reset UI state
+      // -----------------------------
+      // 8. Reset UI state
+      // -----------------------------
       setCurrentPage(1);
       setOpenItems([]);
       setArtistSearch('');
