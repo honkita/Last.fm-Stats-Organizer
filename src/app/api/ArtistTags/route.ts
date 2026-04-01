@@ -3,25 +3,44 @@ import { NextResponse } from 'next/server';
 
 /**
  * Gets the artist tags from the database
- * @returns
+ * Returns both global and split tags
  */
-const GET = async (): Promise<NextResponse<Record<string, string[]>>> => {
-  const dbArtistTags = await prisma.artist.findMany({
+const GET = async (): Promise<NextResponse> => {
+  // Fetch all artist tags with Tag info
+  const dbArtistTags = await prisma.artistTag.findMany({
     include: {
-      ArtistTags: {
-        include: {
-          Tag: true,
+      Artist: {
+        select: {
+          name: true,
         },
       },
+      SameNames: {
+        select: {
+          name: true,
+        },
+      },
+      Tag: true,
     },
   });
 
-  const result = Object.fromEntries(
-    dbArtistTags.map((artist) => [
-      artist.name,
-      artist.ArtistTags.map((at) => at.Tag.name),
-    ]),
-  );
+  // Build structured map
+  const result: Record<
+    string, // artistName
+    string[]
+  > = {};
+
+  for (const at of dbArtistTags) {
+    const artistName = at.SameNames?.name || at.Artist.name;
+    const tagName = at.Tag.name;
+
+    if (!result[artistName]) {
+      result[artistName] = [];
+    }
+
+    result[artistName].push(tagName);
+  }
+
+  console.log(result);
 
   return NextResponse.json(result);
 };

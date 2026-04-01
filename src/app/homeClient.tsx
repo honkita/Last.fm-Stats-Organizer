@@ -113,7 +113,6 @@ const HomeClient = () => {
         console.log('Scrobble fetch failed:', err);
       }
 
-      // ✅ Fetch tags
       const tagRes = await fetch('/api/ArtistTags');
       if (!tagRes.ok) throw new Error('Failed to fetch artist tags');
       const tagMap: Record<string, string[]> = await tagRes.json();
