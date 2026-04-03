@@ -103,9 +103,7 @@ const HomeClient = () => {
       setLoading(true);
       setError(null);
 
-      // -----------------------------
-      // 1. Fetch scrobbles (unchanged)
-      // -----------------------------
+      // Fetch scrobbles
       try {
         const res = await fetch('/api/Scrobbles?user=' + user);
         if (!res.ok) throw new Error('Failed to fetch scrobbles');
@@ -115,9 +113,7 @@ const HomeClient = () => {
         console.log('Scrobble fetch failed:', err);
       }
 
-      // -----------------------------
-      // 2. Fetch tags + hierarchy
-      // -----------------------------
+      // Fetch tags + hierarchy
       const tagRes = await fetch('/api/ArtistTags');
       if (!tagRes.ok) throw new Error('Failed to fetch artist tags');
 
@@ -129,9 +125,7 @@ const HomeClient = () => {
         tagHierarchy: { parentTag: string; childTag: string }[];
       } = await tagRes.json();
 
-      // -----------------------------
-      // 3. Build parent adjacency map
-      // -----------------------------
+      // Build parent adjacency map
       const parentMap: Record<string, string[]> = {};
 
       for (const { parentTag, childTag } of tagHierarchy) {
@@ -139,9 +133,7 @@ const HomeClient = () => {
         parentMap[childTag].push(parentTag);
       }
 
-      // -----------------------------
-      // 4. Resolve full tag hierarchy (cached DFS)
-      // -----------------------------
+      // Resolve full tag hierarchy (cached DFS)
       const cache: Record<string, Set<string>> = {};
 
       const resolveTag = (tag: string): Set<string> => {
@@ -166,9 +158,7 @@ const HomeClient = () => {
         return visited;
       };
 
-      // -----------------------------
-      // 5. Expand artist tags
-      // -----------------------------
+      // Expand artist tags
       const expandedTagMap: Record<string, string[]> = {};
 
       for (const [artist, tags] of Object.entries(rawTagMap)) {
@@ -181,9 +171,7 @@ const HomeClient = () => {
         expandedTagMap[artist] = Array.from(fullSet);
       }
 
-      // -----------------------------
-      // 6. Fetch main data
-      // -----------------------------
+      // Fetch main data
       const res = await getUserInfo(user, (current, total) => {
         setProgress(current);
         setTotalPagesLoading(total);
@@ -194,9 +182,7 @@ const HomeClient = () => {
 
       setArtistAlbums(allData);
 
-      // -----------------------------
-      // 7. Build artists with searchBlob
-      // -----------------------------
+      // Build artists with searchBlob
       const bestAlbumsRecord: Record<string, ArtistWithSearch> = Array.isArray(
         bestAlbumsArray,
       )
@@ -222,9 +208,7 @@ const HomeClient = () => {
 
       setArtists(bestAlbumsRecord);
 
-      // -----------------------------
-      // 8. Reset UI state
-      // -----------------------------
+      // Reset UI state
       setCurrentPage(1);
       setOpenItems([]);
       setArtistSearch('');
@@ -285,8 +269,26 @@ const HomeClient = () => {
               color="black"
               fontWeight="Bold"
               fontFamily="var(--font-sans)"
+              display="flex"
+              flexDirection="row"
+              gap={2}
             >
-              <Emoji text="🎧" /> Last.fm Enhanced Stats
+              <HoverCard.Root>
+                <HoverCard.Trigger asChild>
+                  <HStack cursor="help">
+                    <Emoji text="🎧" />
+                  </HStack>
+                </HoverCard.Trigger>
+
+                <HoverCard.Positioner>
+                  <HoverCard.Content p={3} maxW="220px">
+                    <Text fontSize="sm">
+                      Version {process.env.NEXT_PUBLIC_APP_VERSION}
+                    </Text>
+                  </HoverCard.Content>
+                </HoverCard.Positioner>
+              </HoverCard.Root>
+              Last.fm Enhanced Stats
             </Heading>
 
             <Button
