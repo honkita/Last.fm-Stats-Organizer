@@ -13,9 +13,11 @@ model Artist {
   aliases                   Json?
   ignoreChineseCanonization Boolean @default(false)
 
-  ArtistAlbums ArtistAlbum[]
-  SameNames    SameNames[]
-  ArtistTags   ArtistTag[]
+  ArtistAlbums      ArtistAlbum[]
+  SameNames         SameNames[]
+  ArtistTags        ArtistTag[]
+  outgoingRedirects ArtistAlbumRedirect[] @relation("FromArtistRedirects")
+  incomingRedirects ArtistAlbumRedirect[] @relation("ToArtistRedirects")
 }
 
 model Album {
@@ -23,7 +25,8 @@ model Album {
   name    String @unique
   aliases Json?
 
-  AlbumsArtists ArtistAlbum[]
+  AlbumsArtists        ArtistAlbum[]
+  artistAlbumRedirects ArtistAlbumRedirect[]
 }
 
 model ArtistAlbum {
@@ -91,4 +94,18 @@ model TagHierarchy {
   @@unique([parentTagId, childTagId])
   @@index([parentTagId])
   @@index([childTagId])
+}
+
+model ArtistAlbumRedirect {
+  id Int @id @default(autoincrement())
+
+  albumId      Int
+  fromArtistId Int
+  toArtistId   Int
+
+  Album      Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  FromArtist Artist @relation("FromArtistRedirects", fields: [fromArtistId], references: [id], onDelete: Cascade)
+  ToArtist   Artist @relation("ToArtistRedirects", fields: [toArtistId], references: [id], onDelete: Cascade)
+
+  @@unique([albumId, fromArtistId, toArtistId])
 }
