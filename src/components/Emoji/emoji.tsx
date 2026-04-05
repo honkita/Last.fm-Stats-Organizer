@@ -1,3 +1,6 @@
+'use client';
+
+// Props Types
 interface emojiProps {
   text: string;
 }

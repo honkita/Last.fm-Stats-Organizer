@@ -42,7 +42,9 @@ import {
   artistAlbumContainerMapType,
   artistAlbumTopAlbum,
 } from '@/types/Music';
+import RequestModal from '@/components/RequestModal/requestModal';
 
+// Constants
 const PAGE_SIZE = 100;
 
 const HomeClient = () => {
@@ -365,6 +367,16 @@ const HomeClient = () => {
           {/* Results */}
           {!loading && !error && sortedArtists.length > 0 && (
             <>
+              <RequestModal
+                defaultUser={submittedUser || undefined}
+                artistsList={Object.keys(artists)}
+                artistAlbumsMap={Object.fromEntries(
+                  Object.entries(artistAlbums).map(([k, v]) => [
+                    k,
+                    Object.keys(v.albums),
+                  ]),
+                )}
+              />
               <Heading size="md">
                 <HStack width="100%" gap={6} alignItems="center">
                   {/* Artist Count */}

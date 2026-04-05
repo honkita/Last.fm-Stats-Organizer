@@ -6,6 +6,7 @@ import { HoverCard, HStack, Text } from '@chakra-ui/react';
 // Components
 import Emoji from '@/components/Emoji/emoji';
 
+// Props Types
 interface statNumbersProps {
   emoji: string;
   value: string | number;
