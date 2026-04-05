@@ -76,7 +76,7 @@ const mergeArtists = async (
       }
 
       // Handles cases where the artist name itself contains an alias in parentheses
-      const parenthesisMatch = artist.name.match(/^(.+?)\s*\((.+?)\)\s*$/);
+      const parenthesisMatch = artist.name.match(/^(.*)\s*\(([^()]*)\)\s*$/);
       const isComposition = /[&,，,、＋+×]/.test(artist.name);
       if (parenthesisMatch && !isComposition) {
         const mainName = parenthesisMatch[1].trim();
@@ -397,7 +397,7 @@ const applyArtistAlbumRedirects = async (
 
       const target = data[toArtist];
 
-      // ✅ ADD (not overwrite)
+      // Adds playcount to target album (creating if doesn't exist) and updates artist-level playcount
       target.albums[albumName] ??= {
         playcount: 0,
         image: albumData.image,
