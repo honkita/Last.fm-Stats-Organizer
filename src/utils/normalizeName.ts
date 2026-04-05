@@ -1,3 +1,6 @@
+// Lib
+import { capitalize } from '@/lib/capitalize';
+
 // Utils
 import { canonicalizeName } from '@/utils/canonicalizeName';
 
@@ -174,8 +177,12 @@ export const normalizeAlbumFull = (name: string): string => {
   const normalized = normalizeBrackets(
     name
       .replace(
-        /\s*\((Standard|Video|Deluxe|Expanded|Special|Complete|Unmixed Extended)(\s*(Edition|Version|Ver|Versions\.?))?\)/gi,
+        /\s*\((Standard|Video|Deluxe|Expanded|Special|Complete|Unmixed Extended|Analog)(\s*(Edition|Version|Ver|Versions\.?))?\)/gi,
         '',
+      )
+      .replace(
+        /\s*-\s*([^-()]+?)\s*(version|ver|versions?)\.?\s*-?$/i,
+        (_, type) => ` (${capitalize(type)} Ver.)`,
       )
       .replace(/\s*-\s*(?:EP|Single)$/i, '')
       .replace(/\s+(?:EP)$/i, '')
