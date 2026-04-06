@@ -78,8 +78,6 @@ export const sendEmail = async ({
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/Artist`,
   ).then((res) => res.json());
 
-  console.log(dbArtists);
-
   if (type === 'artist') {
     const artists = [artistA, artistB];
     for (const [index, a] of artists.entries()) {
@@ -88,9 +86,11 @@ export const sendEmail = async ({
     }
   } else {
     const albums = [albumA, albumB];
+    const id = await artistId(artist ?? '', dbArtists);
+    details += `Artist: ${artist ?? ''} (${id || 'Not found'})\n`;
     for (const [index, alb] of albums.entries()) {
-      const id = await albumId(alb ?? '');
-      details += `Album ${index + 1}: ${alb ?? ''} (${id || 'Not found'})\n`;
+      const aId = id ? await albumId(alb ?? '') : '';
+      details += `Album ${index + 1}: ${alb ?? ''} (${aId || 'Not found'})\n`;
     }
   }
 
@@ -98,9 +98,7 @@ export const sendEmail = async ({
 
   const text = start + details + reasonText;
 
-  console.log('Email content:\n', text);
-
-  // Uncomment to actually send
+  // Send email via Resend
   await resend.emails.send({
     from: 'Merge Requests <onboarding@resend.dev>',
     to: process.env.TO_EMAIL!,
