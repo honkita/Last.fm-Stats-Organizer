@@ -78,13 +78,14 @@ export const sendEmail = async ({
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/Artist`,
   ).then((res) => res.json());
 
+  // Fetch artist/album IDs for better context
   if (type === 'artist') {
     const artists = [artistA, artistB];
     for (const [index, a] of artists.entries()) {
       const id = await artistId(a ?? '', dbArtists);
       details += `Artist ${index + 1}: ${a ?? ''} (${id || 'Not found'})\n`;
     }
-  } else {
+  } else if (type === 'album') {
     const albums = [albumA, albumB];
     const id = await artistId(artist ?? '', dbArtists);
     details += `Artist: ${artist ?? ''} (${id || 'Not found'})\n`;
@@ -98,9 +99,11 @@ export const sendEmail = async ({
 
   const text = start + details + reasonText;
 
+  console.log(text);
+
   // Send email via Resend
   await resend.emails.send({
-    from: 'Merge Requests <onboarding@resend.dev>',
+    from: 'Last.fm Enhanced States Requests <onboarding@resend.dev>',
     to: process.env.TO_EMAIL!,
     subject,
     text,

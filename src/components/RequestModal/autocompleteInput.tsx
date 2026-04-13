@@ -1,6 +1,9 @@
 'use client';
 
+// React
 import { useState } from 'react';
+
+// Chakra UI
 import { Input, Box, VStack } from '@chakra-ui/react';
 
 interface AutocompleteInputProps {

@@ -5,7 +5,6 @@ import { useEffect, useState } from 'react';
 
 // Chakra UI
 import {
-  Box,
   Button,
   Dialog,
   Tabs,
