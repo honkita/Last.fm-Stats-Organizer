@@ -9,7 +9,7 @@ import { NextResponse } from 'next/server';
  */
 const GET = async (): Promise<NextResponse> => {
   try {
-    // 1. Fetch artist tags
+    // Fetch artist tags
     const dbArtistTags = await prisma.artistTag.findMany({
       include: {
         Artist: {
@@ -22,7 +22,7 @@ const GET = async (): Promise<NextResponse> => {
       },
     });
 
-    // 2. Fetch tag hierarchy
+    // Fetch tag hierarchy
     const dbHierarchy = await prisma.tagHierarchy.findMany({
       include: {
         parentTag: { select: { name: true } },
@@ -30,7 +30,7 @@ const GET = async (): Promise<NextResponse> => {
       },
     });
 
-    // 3. Build artist -> tags map
+    // Build artist -> tags map
     const tagMap: Record<string, string[]> = {};
 
     for (const at of dbArtistTags) {
