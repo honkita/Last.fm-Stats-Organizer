@@ -16,17 +16,18 @@ import Link from 'next/link';
 
 // Chakra UI
 import {
+  Accordion,
   Box,
+  Button,
   Container,
   Heading,
-  Input,
-  Button,
-  HStack,
-  VStack,
-  Text,
-  Accordion,
-  Progress,
   HoverCard,
+  HStack,
+  Input,
+  Progress,
+  Stack,
+  Text,
+  VStack,
 } from '@chakra-ui/react';
 
 // Components
@@ -368,28 +369,35 @@ const HomeClient = () => {
           {!loading && !error && sortedArtists.length > 0 && (
             <>
               <Heading size="md">
-                <HStack width="100%" gap={6} alignItems="center">
-                  {/* Artist Count */}
-                  <StatNumbers
-                    emoji="👤"
-                    value={totalArtistsLoaded}
-                    infoText="Total number of artists after merging."
-                  />
-                  {/* Total Scrobbles */}
-                  <StatNumbers
-                    emoji="🎧"
-                    value={scrobbles?.toLocaleString() || 'N/A'}
-                    infoText="Total number of listens (scrobbles) recorded on your Last.fm account."
-                  />
+                <Stack
+                  width="100%"
+                  gap={6}
+                  alignItems="center"
+                  direction={{ base: 'column', md: 'row' }}
+                >
+                  {/* Top row (mobile) / inline (desktop) */}
+                  <HStack width={{ base: '100%', md: 'auto' }} gap={6}>
+                    <StatNumbers
+                      emoji="👤"
+                      value={totalArtistsLoaded}
+                      infoText="Total number of artists after merging."
+                    />
+                    <StatNumbers
+                      emoji="🎧"
+                      value={scrobbles?.toLocaleString() || 'N/A'}
+                      infoText="Total number of listens (scrobbles) recorded on your Last.fm account."
+                    />
+                  </HStack>
 
-                  {/* Artist Search */}
+                  {/* Search input */}
                   <Input
                     placeholder="Search artist..."
                     value={artistSearch}
                     onChange={(e) => setArtistSearch(e.target.value)}
+                    width={{ base: '100%', md: '100%' }}
                     {...inputStyles}
                   />
-                </HStack>
+                </Stack>
               </Heading>
               <RequestModal
                 defaultUser={submittedUser || undefined}
