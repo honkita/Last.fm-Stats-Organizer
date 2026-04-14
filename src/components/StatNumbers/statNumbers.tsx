@@ -17,7 +17,11 @@ const StatNumbers = ({ emoji, value, infoText }: statNumbersProps) => {
   return (
     <HoverCard.Root>
       <HoverCard.Trigger asChild>
-        <HStack cursor="help">
+        <HStack
+          cursor="help"
+          width={{ base: '100%', md: 'auto' }}
+          fontSize={{ base: 'xl', md: 'md' }}
+        >
           <Emoji text={emoji} /> {value}
         </HStack>
       </HoverCard.Trigger>
