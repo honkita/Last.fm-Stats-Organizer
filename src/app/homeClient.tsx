@@ -32,6 +32,7 @@ import {
 // Components
 import Emoji from '@/components/Emoji/emoji';
 import Artist from '@/components/Artist/artist';
+import StatNumbers from '@/components/StatNumbers/statNumbers';
 
 // Utils
 import { getUserInfo } from '@/utils/userData';
@@ -41,7 +42,9 @@ import {
   artistAlbumContainerMapType,
   artistAlbumTopAlbum,
 } from '@/types/Music';
+import RequestModal from '@/components/RequestModal/requestModal';
 
+// Constants
 const PAGE_SIZE = 100;
 
 const HomeClient = () => {
@@ -367,39 +370,18 @@ const HomeClient = () => {
               <Heading size="md">
                 <HStack width="100%" gap={6} alignItems="center">
                   {/* Artist Count */}
-                  <HoverCard.Root>
-                    <HoverCard.Trigger asChild>
-                      <HStack cursor="help">
-                        <Emoji text="👤" /> {totalArtistsLoaded}
-                      </HStack>
-                    </HoverCard.Trigger>
-
-                    <HoverCard.Positioner>
-                      <HoverCard.Content p={3} maxW="220px">
-                        <Text fontSize="sm">
-                          Total number of artists after merging.
-                        </Text>
-                      </HoverCard.Content>
-                    </HoverCard.Positioner>
-                  </HoverCard.Root>
-
+                  <StatNumbers
+                    emoji="👤"
+                    value={totalArtistsLoaded}
+                    infoText="Total number of artists after merging."
+                  />
                   {/* Total Scrobbles */}
-                  <HoverCard.Root>
-                    <HoverCard.Trigger asChild>
-                      <HStack cursor="help">
-                        <Emoji text="🎧" /> {scrobbles?.toLocaleString()}
-                      </HStack>
-                    </HoverCard.Trigger>
+                  <StatNumbers
+                    emoji="🎧"
+                    value={scrobbles?.toLocaleString() || 'N/A'}
+                    infoText="Total number of listens (scrobbles) recorded on your Last.fm account."
+                  />
 
-                    <HoverCard.Positioner>
-                      <HoverCard.Content p={3} maxW="220px">
-                        <Text fontSize="sm">
-                          Total number of listens (scrobbles) recorded on your
-                          Last.fm account.
-                        </Text>
-                      </HoverCard.Content>
-                    </HoverCard.Positioner>
-                  </HoverCard.Root>
                   {/* Artist Search */}
                   <Input
                     placeholder="Search artist..."
@@ -409,6 +391,16 @@ const HomeClient = () => {
                   />
                 </HStack>
               </Heading>
+              <RequestModal
+                defaultUser={submittedUser || undefined}
+                artistsList={Object.keys(artists)}
+                artistAlbumsMap={Object.fromEntries(
+                  Object.entries(artistAlbums).map(([k, v]) => [
+                    k,
+                    Object.keys(v.albums),
+                  ]),
+                )}
+              />
 
               <Accordion.Root
                 collapsible

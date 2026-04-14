@@ -211,16 +211,13 @@ export const normalizeSpaces = (name: string): string => {
  * Normalizes seiyuu CV patterns to (CV.NAME)
  * @param name
  * @returns
- */
-/**
+ *
  * Normalizes seiyuu CV patterns to (CV.NAME)
  * Handles ASCII and full-width punctuation like Japanese/Chinese colons.
- */
-/**
  * Normalizes seiyuu CV patterns to (CV.NAME)
+ *
  * Supports full-width brackets & punctuation.
- */
-/**
+ *
  * Normalizes seiyuu CV patterns:
  * - Converts any CJK brackets to standard ( )
  * - Normalizes CV patterns to (CV.NAME)
