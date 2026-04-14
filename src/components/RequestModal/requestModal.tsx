@@ -14,6 +14,7 @@ import {
   Portal,
   HStack,
 } from '@chakra-ui/react';
+import { toaster } from '@/components/ui/toaster';
 
 // Components
 import AutocompleteInput from './autocompleteInput';
@@ -42,8 +43,6 @@ const RequestModal = ({
   // Reason state for merging/changing
   const [reason, setReason] = useState('');
 
-  const [otherRequest, setOtherRequest] = useState('');
-
   // Error Messages
   const [artistError, setArtistError] = useState('');
   const [albumError, setAlbumError] = useState('');
@@ -62,9 +61,6 @@ const RequestModal = ({
     setAlbumA('');
     setAlbumB('');
     setReason('');
-
-    // Reset other request field
-    setOtherRequest('');
 
     // Reset the error states
     setArtistError('');
@@ -103,7 +99,7 @@ const RequestModal = ({
     }
 
     if (type === 'other') {
-      if (!otherRequest.trim()) {
+      if (!reason.trim()) {
         setOtherError('Request cannot be empty.');
         return;
       }
@@ -141,11 +137,21 @@ const RequestModal = ({
 
       if (!res.ok) throw new Error();
 
+      toaster.create({
+        title: 'Request submitted',
+        description: 'Your request was successfully sent.',
+        type: 'success',
+      });
+
       // Reset + close
       resetForm();
       setOpen(false);
     } catch {
-      alert('Failed to submit request');
+      toaster.create({
+        title: 'Submission failed',
+        description: 'Something went wrong. Please try again.',
+        type: 'error',
+      });
     }
   };
 
@@ -281,8 +287,8 @@ const RequestModal = ({
                     <VStack flex={1} mt={4} gap={3} align="stretch">
                       <Textarea
                         placeholder="Describe your request..."
-                        value={otherRequest}
-                        onChange={(e) => setOtherRequest(e.target.value)}
+                        value={reason}
+                        onChange={(e) => setReason(e.target.value)}
                         flex={1}
                         resize="none"
                       />

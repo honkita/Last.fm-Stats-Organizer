@@ -25,6 +25,7 @@ const fetchJsonOrNull = async (url: string) => {
   }
 };
 
+// Helper functions to get artist/album IDs for better email context
 const artistId = async (
   artistName: string,
   dbArtists: Record<string, Artist>,
@@ -34,6 +35,7 @@ const artistId = async (
   return artist?.id ?? '';
 };
 
+// For albums, we need to fetch the album details to get the ID
 const albumId = async (albumName: string) => {
   if (!albumName) return '';
   const data = await fetchJsonOrNull(

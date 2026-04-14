@@ -20,12 +20,18 @@ const POST = async (req: NextRequest) => {
           { status: 400 },
         );
       }
-    }
-
-    if (data.type === 'album') {
+    } else if (data.type === 'album') {
       if (!data.artist || !data.albumA || !data.albumB) {
         return NextResponse.json(
           { error: 'Missing album fields' },
+          { status: 400 },
+        );
+      }
+    } else if (data.type === 'other') {
+      console.log(data.reason);
+      if (!data.reason) {
+        return NextResponse.json(
+          { error: 'Missing reason field' },
           { status: 400 },
         );
       }
