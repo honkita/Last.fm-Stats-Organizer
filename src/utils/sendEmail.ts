@@ -68,7 +68,9 @@ export const sendEmail = async ({
   const subject =
     type === 'artist'
       ? `Artist Merge Request: ${artistA} + ${artistB}`
-      : `Album Merge Request: ${albumA} + ${albumB}`;
+      : type === 'album'
+        ? `Album Merge Request for Artist ${artist ?? 'Unknown'}: ${albumA} + ${albumB}`
+        : 'Album Merge Request (Other)';
 
   const start = `${user ?? 'Someone'} has a new ${type} merge request:\n\n`;
 
@@ -99,11 +101,9 @@ export const sendEmail = async ({
 
   const text = start + details + reasonText;
 
-  console.log(text);
-
   // Send email via Resend
   await resend.emails.send({
-    from: 'Last.fm Enhanced States Requests <onboarding@resend.dev>',
+    from: 'Last.fm Enhanced States Requests <submitFix@updates.elitelu.com>',
     to: process.env.TO_EMAIL!,
     subject,
     text,
