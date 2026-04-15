@@ -280,7 +280,16 @@ const HomeClient = () => {
               <HoverCard.Root>
                 <HoverCard.Trigger asChild>
                   <HStack cursor="help">
-                    <Emoji text="🎧" />
+                    <Link
+                      href="/Changelog"
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: 8,
+                      }}
+                    >
+                      <Emoji text="🎧" />
+                    </Link>
                   </HStack>
                 </HoverCard.Trigger>
 

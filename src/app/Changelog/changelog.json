@@ -1,0 +1,63 @@
+[
+  {
+    "version": "2.4.0",
+    "date": "2026-04-15",
+    "changes": {
+      "added": ["Change log page to use the new versioning system."],
+      "improved": [],
+      "fixed": []
+    }
+  },
+  {
+    "version": "2.3.1",
+    "date": "2026-04-14",
+    "changes": {
+      "added": [],
+      "improved": ["Mobile view improvements."],
+      "fixed": []
+    }
+  },
+  {
+    "version": "2.3.0",
+    "date": "2026-04-14",
+    "changes": {
+      "added": [
+        "User suggestion form to submit artist merges, album merges, and bug reports."
+      ],
+      "improved": ["UI fixes."],
+      "fixed": []
+    }
+  },
+  {
+    "version": "2.2.0",
+    "date": "2026-04-10",
+    "changes": {
+      "added": ["README file with project description and setup instructions."],
+      "improved": [
+        "Improved album regex to handle instrument versions (Piano Version, Guitar Version, etc. ).",
+        "Improved album regex to handle analog album version."
+      ],
+      "fixed": []
+    }
+  },
+  {
+    "version": "2.1.1",
+    "date": "2026-04-04",
+    "changes": {
+      "added": [],
+      "improved": [],
+      "fixed": [
+        "Fixed artist names with nested parantheses when merging artists."
+      ]
+    }
+  },
+  {
+    "version": "2.1.0",
+    "date": "2026-04-03",
+    "changes": {
+      "added": ["Started versioning system."],
+      "improved": [],
+      "fixed": []
+    }
+  }
+]
