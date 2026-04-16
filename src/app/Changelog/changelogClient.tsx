@@ -1,19 +1,44 @@
 'use client';
 
-// Chakra UI
-import { Box, Container, Heading, VStack, Text } from '@chakra-ui/react';
+// React
+import { useState } from 'react';
 
+// Chakra UI
+import {
+  Accordion,
+  Box,
+  Container,
+  Heading,
+  HStack,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
+
+// JSONs
 import changelog from './changelog.json';
+import Emoji from '@/components/Emoji/emoji';
 
 const ChangelogPage = () => {
+  // Track which accordion items are open
+  const [openItems, setOpenItems] = useState<string[]>([]);
+
   return (
     <Box minH="100vh" py={20}>
       <Container maxW="2xl">
         <VStack align="stretch" gap={8}>
           {/* Header */}
           <VStack align="start" gap={2}>
-            <Heading size="xl" fontFamily="var(--font-sans)">
-              Changelog
+            <Heading
+              size="3xl"
+              color="black"
+              fontWeight="Bold"
+              fontFamily="var(--font-sans)"
+              display="flex"
+              flexDirection="row"
+              gap={2}
+            >
+              <Emoji text="✏︎" />
+              Change Log
             </Heading>
 
             <Text fontSize="sm" color="gray.500">
@@ -22,33 +47,59 @@ const ChangelogPage = () => {
           </VStack>
 
           {/* List */}
-          {changelog.map((version, versionIdx) => (
-            <VStack key={versionIdx} align="start" gap={2}>
-              <Heading size="md">{version.version}</Heading>
 
-              <Text fontSize="sm" color="gray.500">
-                {version.date}
-              </Text>
+          <Accordion.Root
+            collapsible
+            gap={10}
+            value={openItems}
+            onValueChange={(e) => setOpenItems(e.value)}
+          >
+            {changelog.map((version, versionIdx) => {
+              // Find the rank relative to sortedArtists
+              return (
+                <Accordion.Item
+                  key={versionIdx}
+                  value={version.version}
+                  borderWidth="1px"
+                  borderRadius="lg"
+                  px={3}
+                  py={2}
+                  mb={4}
+                >
+                  <Accordion.ItemTrigger>
+                    <HStack gap={1} flex={1} width="200px">
+                      <Text fontWeight="semibold">{version.version}</Text>
+                    </HStack>
+                  </Accordion.ItemTrigger>
 
-              {version.changes.added.map((item, idx) => (
-                <Text fontSize="sm" key={idx}>
-                  + {item}
-                </Text>
-              ))}
+                  <Accordion.ItemContent>
+                    <VStack gap={2} align="stretch">
+                      <Text fontSize="sm" color="gray.500">
+                        {version.date}
+                      </Text>
+                      {version.changes.added.map((item, idx) => (
+                        <Text fontSize="sm" key={idx}>
+                          + {item}
+                        </Text>
+                      ))}
 
-              {version.changes.improved.map((item, idx) => (
-                <Text fontSize="sm" key={idx}>
-                  ✓ {item}
-                </Text>
-              ))}
+                      {version.changes.improved.map((item, idx) => (
+                        <Text fontSize="sm" key={idx}>
+                          ✓ {item}
+                        </Text>
+                      ))}
 
-              {version.changes.fixed.map((item, idx) => (
-                <Text fontSize="sm" key={idx}>
-                  ✗ {item}
-                </Text>
-              ))}
-            </VStack>
-          ))}
+                      {version.changes.fixed.map((item, idx) => (
+                        <Text fontSize="sm" key={idx}>
+                          ✗ {item}
+                        </Text>
+                      ))}
+                    </VStack>
+                  </Accordion.ItemContent>
+                </Accordion.Item>
+              );
+            })}
+          </Accordion.Root>
         </VStack>
       </Container>
     </Box>

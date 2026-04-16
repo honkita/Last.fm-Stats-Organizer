@@ -60,9 +60,8 @@ const SidePanel = () => {
           bottom="60px"
         >
           <VStack gap={5}>
-            {sidePanelButtons
-              .reverse()
-              .map((button: SidePanelButtonType, index: number) => (
+            {sidePanelButtons.map(
+              (button: SidePanelButtonType, index: number) => (
                 <Tooltip
                   key={index}
                   content={button.tooltip}
@@ -85,7 +84,8 @@ const SidePanel = () => {
                     </Link>
                   </Button>
                 </Tooltip>
-              ))}
+              ),
+            )}
           </VStack>
         </MotionBox>
       </VStack>
