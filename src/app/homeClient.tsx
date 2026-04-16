@@ -9,10 +9,6 @@ import {
   FaAngleLeft,
   FaAngleRight,
 } from 'react-icons/fa';
-import { FaGithub } from 'react-icons/fa6';
-
-// Next.js
-import Link from 'next/link';
 
 // Chakra UI
 import {
@@ -279,17 +275,8 @@ const HomeClient = () => {
             >
               <HoverCard.Root>
                 <HoverCard.Trigger asChild>
-                  <HStack cursor="help">
-                    <Link
-                      href="/Changelog"
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: 8,
-                      }}
-                    >
-                      <Emoji text="🎧" />
-                    </Link>
+                  <HStack cursor="option">
+                    <Emoji text="🎧" />
                   </HStack>
                 </HoverCard.Trigger>
 
@@ -303,22 +290,6 @@ const HomeClient = () => {
               </HoverCard.Root>
               Last.fm Enhanced Stats
             </Heading>
-
-            <Button
-              asChild
-              size="lg"
-              p={3}
-              color="brand.primaryAccent"
-              background="none"
-            >
-              <Link
-                href="https://github.com/honkita/Last.fm-Stats-Organizer"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FaGithub style={{ width: '40px', height: '40px' }} />
-              </Link>
-            </Button>
           </HStack>
 
           {/* Form */}

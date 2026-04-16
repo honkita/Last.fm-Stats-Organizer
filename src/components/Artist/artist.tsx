@@ -1,7 +1,7 @@
 // Chakra UI
 import { Accordion, HStack, Text, VStack } from '@chakra-ui/react';
 
-// Child Components
+// Components
 import ArtistName from '@/components/Artist/artistName';
 import Emoji from '@/components/Emoji/emoji';
 
