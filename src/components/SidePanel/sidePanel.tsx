@@ -28,7 +28,12 @@ const SidePanel = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <MotionBox position="fixed" left="10px" bottom="10px" zIndex={1000}>
+    <MotionBox
+      position="fixed"
+      left={{ base: '1.5rem', md: '5%' }}
+      bottom={{ base: '1.5rem', md: '24px' }}
+      zIndex={1000}
+    >
       <VStack gap={3} align="center" justify="center">
         {/* Toggle Button */}
         <IconButton
