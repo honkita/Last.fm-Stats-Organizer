@@ -177,7 +177,7 @@ export const normalizeAlbumFull = (name: string): string => {
   const normalized = normalizeBrackets(
     name
       .replace(
-        /\s*\((Standard|Video|Deluxe|Expanded|Special|Complete|Unmixed Extended|Analog)(\s*(Edition|Version|Ver|Versions\.?))?\)/gi,
+        /\s*\((Standard|Video|Deluxe|Expanded|Special|Complete|Platinum|Unmixed Extended|Analog)(\s*(Edition|Version|Ver|Versions\.?))?\)/gi,
         '',
       )
       .replace(

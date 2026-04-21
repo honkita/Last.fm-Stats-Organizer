@@ -1,5 +1,16 @@
 [
   {
+    "version": "2.5.1",
+    "date": "2026-04-21",
+    "changes": {
+      "added": [],
+      "improved": [
+        "Added Platinum Edition to the album regex to handle more album versions."
+      ],
+      "fixed": []
+    }
+  },
+  {
     "version": "2.5.0",
     "date": "2026-04-21",
     "changes": {
