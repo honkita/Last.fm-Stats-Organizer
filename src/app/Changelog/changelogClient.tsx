@@ -8,15 +8,16 @@ import {
   Accordion,
   Box,
   Container,
-  Heading,
   HStack,
   Text,
   VStack,
 } from '@chakra-ui/react';
 
+// Components
+import Title from '@/components/Title/title';
+
 // JSONs
 import changelog from './changelog.json';
-import Emoji from '@/components/Emoji/emoji';
 
 const ChangelogPage = () => {
   // Track which accordion items are open
@@ -24,27 +25,10 @@ const ChangelogPage = () => {
 
   return (
     <Box minH="100vh" py={20}>
-      <Container maxW="2xl">
-        <VStack align="stretch" gap={8}>
+      <Container maxW="3xl">
+        <VStack align="stretch" gap={8} width="100%">
           {/* Header */}
-          <VStack align="start" gap={2}>
-            <Heading
-              size="3xl"
-              color="black"
-              fontWeight="Bold"
-              fontFamily="var(--font-sans)"
-              display="flex"
-              flexDirection="row"
-              gap={2}
-            >
-              <Emoji text="✏︎" />
-              Change Log
-            </Heading>
-
-            <Text fontSize="sm" color="gray.500">
-              Updates and improvements to Last.fm Enhanced Stats
-            </Text>
-          </VStack>
+          <Title title="Change Log" emoji="✏︎" />
 
           {/* List */}
 

@@ -17,7 +17,6 @@ import {
   Button,
   Container,
   Heading,
-  HoverCard,
   HStack,
   Input,
   Progress,
@@ -27,8 +26,8 @@ import {
 } from '@chakra-ui/react';
 
 // Components
-import Emoji from '@/components/Emoji/emoji';
 import Artist from '@/components/Artist/artist';
+import Title from '@/components/Title/title';
 import StatNumbers from '@/components/StatNumbers/statNumbers';
 
 // Utils
@@ -263,34 +262,7 @@ const HomeClient = () => {
       <Container maxW="3xl">
         <VStack align="stretch" gap={8} width="100%">
           {/* Header */}
-          <HStack width="100%" justify="space-between">
-            <Heading
-              size="3xl"
-              color="black"
-              fontWeight="Bold"
-              fontFamily="var(--font-sans)"
-              display="flex"
-              flexDirection="row"
-              gap={2}
-            >
-              <HoverCard.Root>
-                <HoverCard.Trigger asChild>
-                  <HStack cursor="option">
-                    <Emoji text="🎧" />
-                  </HStack>
-                </HoverCard.Trigger>
-
-                <HoverCard.Positioner>
-                  <HoverCard.Content p={3} maxW="220px">
-                    <Text fontSize="sm">
-                      Version {process.env.NEXT_PUBLIC_APP_VERSION}
-                    </Text>
-                  </HoverCard.Content>
-                </HoverCard.Positioner>
-              </HoverCard.Root>
-              Last.fm Enhanced Stats
-            </Heading>
-          </HStack>
+          <Title title="Last.fm Enhanced Stats" emoji="🎧" />
 
           {/* Form */}
           <form onSubmit={handleSubmit}>

@@ -2,16 +2,13 @@
 
 // React
 import { useState } from 'react';
-import { FaBars, FaTimes } from 'react-icons/fa';
+import { FaBars } from 'react-icons/fa';
 
 // Next.js
 import Link from 'next/link';
 
 // Chakra UI
-import { Button, Box, VStack, IconButton } from '@chakra-ui/react';
-
-// Chakra UI Snippets
-import { Tooltip } from '@/components/ui/tooltip';
+import { Button, Menu, Portal } from '@chakra-ui/react';
 
 // Framer Motion
 import { motion } from 'framer-motion';
@@ -22,62 +19,33 @@ import { sidePanelButtons } from './sidePanelButtons';
 // Types
 import { SidePanelButtonType } from '@/types/SidePanelButtonType';
 
-const MotionBox = motion.create(Box);
-
 const SidePanel = () => {
   const [open, setOpen] = useState(false);
 
   return (
-    <MotionBox
-      position="fixed"
-      left={{ base: '1.5rem', md: '5%' }}
-      bottom={{ base: '1.5rem', md: '24px' }}
-      zIndex={1000}
-    >
-      <VStack gap={3} align="center" justify="center">
-        {/* Toggle Button */}
-        <IconButton
-          aria-label="toggle panel"
-          onClick={() => setOpen((v) => !v)}
-          borderRadius="full"
-          size="lg"
-          backgroundColor="brand.primaryAccent"
-          color="white"
-        >
+    <Menu.Root>
+      <Menu.Trigger asChild>
+        <Button asChild size="lg" color="brand.primaryAccent" background="none">
           <motion.div
             animate={{ rotate: open ? 90 : 0 }}
             transition={{ duration: 0.25 }}
           >
-            {open ? <FaTimes /> : <FaBars />}
+            <FaBars />
           </motion.div>
-        </IconButton>
-
-        <MotionBox
-          initial={false}
-          animate={{
-            opacity: open ? 1 : 0,
-            scale: open ? 1 : 0.95,
-            pointerEvents: open ? 'auto' : 'none',
-            translateY: open ? '0' : '10px',
-          }}
-          transition={{ duration: 0.2 }}
-          position="absolute"
-          bottom="60px"
-        >
-          <VStack gap={5}>
+        </Button>
+      </Menu.Trigger>
+      <Portal>
+        <Menu.Positioner>
+          <Menu.Content p={1} minW="unset" overflow="hidden" borderRadius="xl">
             {sidePanelButtons.map(
               (button: SidePanelButtonType, index: number) => (
-                <Tooltip
-                  key={index}
-                  content={button.tooltip}
-                  positioning={{ placement: 'left' }}
-                >
+                <Menu.Item value={button.link} key={index}>
                   <Button
                     asChild
                     size="lg"
-                    p={3}
                     color="brand.primaryAccent"
                     background="none"
+                    aspectRatio={1}
                   >
                     <Link
                       href={button.link}
@@ -88,13 +56,13 @@ const SidePanel = () => {
                       {button.icon}
                     </Link>
                   </Button>
-                </Tooltip>
+                </Menu.Item>
               ),
             )}
-          </VStack>
-        </MotionBox>
-      </VStack>
-    </MotionBox>
+          </Menu.Content>
+        </Menu.Positioner>
+      </Portal>
+    </Menu.Root>
   );
 };
 
