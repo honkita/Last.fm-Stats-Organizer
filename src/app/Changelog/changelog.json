@@ -1,7 +1,7 @@
 [
   {
     "version": "2.4.1",
-    "date": "2026-04-15",
+    "date": "2026-04-21",
     "changes": {
       "added": [
         "Added a navbar with links to the change log and the GitHub repository."
