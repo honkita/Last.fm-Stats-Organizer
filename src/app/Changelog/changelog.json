@@ -7,7 +7,9 @@
       "improved": [
         "Added Platinum Edition to the album regex to handle more album versions."
       ],
-      "fixed": []
+      "fixed": [
+        "Fixed a bug regarding the send request page not emailing the correct information."
+      ]
     }
   },
   {
