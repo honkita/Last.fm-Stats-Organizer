@@ -1,9 +1,23 @@
 [
   {
+    "version": "2.5.0",
+    "date": "2026-04-21",
+    "changes": {
+      "added": [
+        "Added a navbar with links to the change log and the GitHub repository."
+      ],
+      "improved": [
+        "UI improvements for the header, removing clutter from the title.",
+        "Change log page revamped to use an accordion for better organization and readability."
+      ],
+      "fixed": []
+    }
+  },
+  {
     "version": "2.4.0",
     "date": "2026-04-15",
     "changes": {
-      "added": ["Change log page to use the new versioning system."],
+      "added": ["Change log page, which will document the newest changes."],
       "improved": [],
       "fixed": []
     }

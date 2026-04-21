@@ -1,5 +1,7 @@
 // Chakra UI
 import { ChakraUIProvider } from '@/components/ui/provider';
+
+// Chakra UI Snippets
 import { Toaster } from '@/components/ui/toaster';
 
 // CSS
