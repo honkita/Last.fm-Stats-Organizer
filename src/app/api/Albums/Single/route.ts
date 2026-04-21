@@ -17,6 +17,9 @@ const GET = async (request: NextRequest) => {
       return NextResponse.json({ error: 'Missing albumName' }, { status: 400 });
     }
     const album = await prisma.album.findFirst({
+      where: {
+        name: albumName,
+      },
       select: { id: true, name: true },
     });
 
