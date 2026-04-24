@@ -1,5 +1,18 @@
 [
   {
+    "version": "2.5.2",
+    "date": "2026-04-24",
+    "changes": {
+      "added": [],
+      "improved": [
+        "Enhanced email capabilities for request for easier communication with users."
+      ],
+      "fixed": [
+        "Fixed a bug regarding the send request page not emailing the correct information."
+      ]
+    }
+  },
+  {
     "version": "2.5.1",
     "date": "2026-04-21",
     "changes": {
