@@ -6,7 +6,7 @@ import { prisma } from '@/lib/prisma';
 
 // Utils
 import { canonicalAlbumKey } from '@/utils/normalizeName';
-import { levenshtein, similarityScore } from '@/utils/stringSimilarity';
+import { levenshtein, similarityScore } from '@/utils/levenshtein';
 
 /**
  * Gets the albums from the database and stores them in a global variable for caching.
