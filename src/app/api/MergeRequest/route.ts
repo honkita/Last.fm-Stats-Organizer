@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 // Utils
-import { sendEmail } from '@/utils/sendEmail';
+import sendEmail from '@/utils/sendEmail';
 
 const POST = async (req: NextRequest) => {
   try {

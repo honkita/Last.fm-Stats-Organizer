@@ -36,14 +36,14 @@ const artistId = async (
 };
 
 // For albums, we need to fetch the album details to get the ID
-const albumId = async (albumName: string) => {
-  if (!albumName) return '';
+const albumIds = async (albumName: string) => {
+  if (!albumName) return [];
+
   const data = await fetchJsonOrNull(
-    `${process.env.NEXT_PUBLIC_BASE_URL}/api/Albums/Single?albumName=${encodeURIComponent(
-      albumName,
-    )}`,
+    `${process.env.NEXT_PUBLIC_BASE_URL}/api/Albums/Single?albumName=${encodeURIComponent(albumName)}`,
   );
-  return data?.id ?? '';
+
+  return data ?? [];
 };
 
 interface SendEmailProps {
@@ -57,7 +57,7 @@ interface SendEmailProps {
   user?: string;
 }
 
-export const sendEmail = async ({
+const sendEmail = async ({
   type,
   artistA,
   artistB,
@@ -94,8 +94,8 @@ export const sendEmail = async ({
     const id = await artistId(artist ?? '', dbArtists);
     details += `Artist: ${artist ?? ''} (${id || 'Not found'})\n`;
     for (const [index, alb] of albums.entries()) {
-      const aId = id ? await albumId(alb ?? '') : '';
-      details += `Album ${index + 1}: ${alb ?? ''} (${aId || 'Not found'})\n`;
+      const aIds = id ? await albumIds(alb ?? '') : [];
+      details += `Album ${index + 1}: ${alb ?? ''} (${aIds.length > 0 ? aIds[0].id : 'Not found'})\n`;
     }
   }
 
@@ -111,3 +111,5 @@ export const sendEmail = async ({
     text,
   });
 };
+
+export default sendEmail;

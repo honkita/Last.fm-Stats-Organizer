@@ -29,9 +29,7 @@ const ChangelogPage = () => {
         <VStack align="stretch" gap={8} width="100%">
           {/* Header */}
           <Title title="Change Log" emoji="✏︎" />
-
           {/* List */}
-
           <Accordion.Root
             collapsible
             gap={10}
