@@ -308,6 +308,7 @@ const splitArtists = async (
   sameNameMap: Record<string, Record<string, string[]>>,
 ): Promise<artistAlbumContainerMapType> => {
   for (const [originalName, data] of Object.entries(sameNameMap)) {
+    console.log(data);
     const baseData = mergedNormalized[originalName];
     if (!baseData) {
       // If no albums exist for the original artist, just remove it and skip
@@ -506,18 +507,12 @@ export const getUserInfo = async (
 
     const dbAlbums = await fetch('/api/ArtistAlbum');
     if (!dbAlbums.ok) throw new Error('Failed to fetch artist albums');
-    const dbAlbumsMap: Record<
-      string,
-      Record<string, string[]>
-    > = await dbAlbums.json();
+    const { albumAliasMap, splitMap, defaultArtist } = await dbAlbums.json();
 
     const dbSameNamesFetch = await fetch('/api/SameName');
     if (!dbSameNamesFetch.ok)
       throw new Error('Failed to fetch same name mappings');
     const dbSameNames: SameNames[] = await dbSameNamesFetch.json();
-
-    // Hash map for default artist names
-    const defaultArtist: Record<string, string> = {};
 
     // Hash map for same artist names (Lisa, Bibi, etc.)
     const sameNameMap: Record<string, Record<string, string[]>> = {};
@@ -583,17 +578,20 @@ export const getUserInfo = async (
     > = await redirectFetch.json();
 
     // Split artists based on default and same name mappings
+    const merged = await mergeArtists(built, dbArtistMap);
+
+    const normalized = await albumNormalization(merged, albumAliasMap);
+
+    const redirected = await applyArtistAlbumRedirects(
+      normalized,
+      redirectMap,
+      dbArtistMap,
+    );
+
     const splitArtistList = await splitArtists(
-      await applyArtistAlbumRedirects(
-        await albumNormalization(
-          await mergeArtists(built, dbArtistMap),
-          dbAlbumsMap,
-        ),
-        redirectMap,
-        dbArtistMap,
-      ),
+      redirected,
       defaultArtist,
-      sameNameMap,
+      splitMap,
     );
 
     const bestAlbum = await getBestAlbum(splitArtistList);

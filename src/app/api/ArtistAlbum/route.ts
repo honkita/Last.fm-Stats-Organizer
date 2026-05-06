@@ -1,15 +1,21 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-const dbAlbumsMap: Record<string, Record<string, string[]>> = {};
+const albumAliasMap: Record<string, Record<string, string[]>> = {};
+const splitMap: Record<string, Record<string, string[]>> = {};
+const defaultArtist: Record<string, string> = {};
+
+interface ArtistAlbumResponse {
+  albumAliasMap: Record<string, Record<string, string[]>>;
+  splitMap: Record<string, Record<string, string[]>>;
+  defaultArtist: Record<string, string>;
+}
 
 /**
  * Gets the albums from the database and stores them in a global variable for caching.
  * @returns
  */
-const GET = async (): Promise<
-  NextResponse<Record<string, Record<string, string[]>>>
-> => {
+const GET = async (): Promise<NextResponse<ArtistAlbumResponse>> => {
   const dbArtistAlbums = await prisma.artistAlbum.findMany({
     select: {
       Artist: {
@@ -19,38 +25,52 @@ const GET = async (): Promise<
       },
       Albums: {
         select: {
-          id: true,
           name: true,
           aliases: true,
         },
       },
+      SameNames: { select: { name: true, isDefault: true } },
       role: true,
     },
   });
 
-  dbArtistAlbums.forEach((album) => {
-    const artistName = album.Artist.name;
-    const albumName = album.Albums.name;
+  dbArtistAlbums.forEach((row) => {
+    const baseArtist = row.Artist.name;
+    const splitName = row.SameNames?.name ?? baseArtist;
+    const albumName = row.Albums.name;
 
-    dbAlbumsMap[artistName] ??= {};
+    // Album alias map
+    albumAliasMap[splitName] ??= {};
 
     let aliases: string[] = [];
-    if (Array.isArray(album.Albums.aliases)) {
-      aliases = album.Albums.aliases.filter(
+    if (Array.isArray(row.Albums.aliases)) {
+      aliases = row.Albums.aliases.filter(
         (a): a is string => typeof a === 'string',
       );
-    } else if (typeof album.Albums.aliases === 'string') {
-      try {
-        const parsed = JSON.parse(album.Albums.aliases);
-        if (Array.isArray(parsed))
-          aliases = parsed.filter((a): a is string => typeof a === 'string');
-      } catch {}
     }
 
-    dbAlbumsMap[artistName][albumName] = aliases;
+    albumAliasMap[baseArtist] ??= {};
+    albumAliasMap[baseArtist][albumName] ??= [];
+
+    albumAliasMap[baseArtist][albumName].push(...aliases);
+
+    // Split map
+    if (row.SameNames) {
+      splitMap[baseArtist] ??= {};
+      splitMap[baseArtist][splitName] ??= [];
+      splitMap[baseArtist][splitName].push(albumName);
+
+      if (row.SameNames.isDefault) {
+        defaultArtist[baseArtist] = splitName;
+      }
+    }
   });
 
-  return NextResponse.json(dbAlbumsMap);
+  return NextResponse.json({
+    albumAliasMap,
+    splitMap,
+    defaultArtist,
+  });
 };
 
 export { GET };
