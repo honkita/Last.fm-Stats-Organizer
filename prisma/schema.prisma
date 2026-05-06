@@ -30,13 +30,22 @@ model Album {
 }
 
 model ArtistAlbum {
-  artistId Int
-  albumId  Int
-  role     Int    @default(0)
-  Albums   Album  @relation(fields: [albumId], references: [id], onDelete: Cascade)
-  Artist   Artist @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  id Int @id @default(autoincrement())
 
-  @@id([artistId, albumId])
+  artistId    Int
+  albumId     Int
+  sameNamesId Int?
+  role        Int        @default(0)
+  Albums      Album      @relation(fields: [albumId], references: [id], onDelete: Cascade)
+  Artist      Artist     @relation(fields: [artistId], references: [id], onDelete: Cascade)
+  SameNames   SameNames? @relation(fields: [sameNamesId], references: [id], onDelete: Cascade)
+
+  // Prevent duplicate split-specific tags
+  @@unique([artistId, albumId, sameNamesId])
+  // Prevent duplicate global tags
+  @@unique([artistId, albumId])
+  @@index([artistId])
+  @@index([sameNamesId])
 }
 
 model SameNames {
@@ -48,7 +57,8 @@ model SameNames {
 
   Artist Artist @relation(fields: [groupID], references: [id], onDelete: Cascade)
 
-  ArtistTags ArtistTag[]
+  ArtistTags   ArtistTag[]
+  artistAlbums ArtistAlbum[]
 
   @@unique([groupID, name]) // ensures identity per artist
   @@index([groupID])
