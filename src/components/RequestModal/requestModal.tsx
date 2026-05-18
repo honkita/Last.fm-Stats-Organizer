@@ -170,6 +170,7 @@ const RequestModal = ({
           resetForm();
           setOpen(true);
         }}
+        flex={1}
         backgroundColor="brand.primaryAccent"
       >
         Request Merge

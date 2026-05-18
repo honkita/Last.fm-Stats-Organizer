@@ -1,30 +1,14 @@
 // Chakra UI
 import { useAccordionItemContext, Text } from '@chakra-ui/react';
 
-// Context
-import { useLanguage } from '@/contexts/LanguageContext';
-
-// Utils
-import {
-  traditionalToSimplified,
-  simplifiedToTraditional,
-} from '@/utils/canonicalizeName';
-
 // Props Types
 interface ArtistNameProps {
   name: string;
   rank: number;
-  ignoreChineseConversion: boolean;
 }
 
-const ArtistName = ({
-  name,
-  rank,
-  ignoreChineseConversion,
-}: ArtistNameProps) => {
+const ArtistName = ({ name, rank }: ArtistNameProps) => {
   const item = useAccordionItemContext();
-
-  const { chineseScript } = useLanguage();
 
   const expanded = item?.expanded;
 
@@ -38,12 +22,7 @@ const ArtistName = ({
       textOverflow={expanded ? 'clip' : 'ellipsis'}
       whiteSpace={expanded ? 'normal' : 'nowrap'}
     >
-      {rank}.{' '}
-      {ignoreChineseConversion
-        ? name
-        : chineseScript === 'traditional'
-          ? simplifiedToTraditional(name)
-          : traditionalToSimplified(name)}
+      {rank}. {name}
     </Text>
   );
 };

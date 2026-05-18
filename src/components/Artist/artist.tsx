@@ -5,8 +5,12 @@ import { Accordion, HStack, Text, VStack } from '@chakra-ui/react';
 import ArtistName from '@/components/Artist/artistName';
 import Emoji from '@/components/Emoji/emoji';
 
+// Context
+import { useLanguage } from '@/contexts/LanguageContext';
+
 // Types
 import { artistAlbumTopAlbum, artistAlbumContainer } from '@/types/Music';
+import { simplifiedToTraditional } from '@/utils/canonicalizeName';
 
 // Props Types
 interface ArtistProps {
@@ -24,6 +28,7 @@ const Artist = ({
 }: ArtistProps) => {
   const name = artist.name;
   const albumData: artistAlbumContainer = artistAlbums[name];
+  const { chineseScript } = useLanguage();
   if (!albumData) return null;
 
   const albumEntries = Object.entries(albumData.albums);
@@ -47,9 +52,12 @@ const Artist = ({
         <HStack flex="1" justify="space-between" align="center">
           <HStack gap={1} flex={1} width="200px">
             <ArtistName
-              name={name}
+              name={
+                ignoreChineseConversion || chineseScript === 'simplified'
+                  ? name
+                  : simplifiedToTraditional(name)
+              }
               rank={rank}
-              ignoreChineseConversion={ignoreChineseConversion}
             />
           </HStack>
           <VStack
@@ -81,7 +89,11 @@ const Artist = ({
                 fontSize="sm"
                 align="start"
               >
-                <Text width="80%">{albumName}</Text>
+                <Text width="80%">
+                  {ignoreChineseConversion || chineseScript === 'simplified'
+                    ? albumName
+                    : simplifiedToTraditional(albumName)}
+                </Text>
                 <Text color="gray.500" width="20%" textAlign="right">
                   {album.playcount.toLocaleString()} <Emoji text="🎧" />
                 </Text>

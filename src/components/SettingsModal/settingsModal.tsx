@@ -13,7 +13,7 @@ import {
 
 import { useLanguage } from '@/contexts/LanguageContext';
 
-export default function SettingsPanel() {
+const SettingsModal = () => {
   const { chineseScript, setChineseScript } = useLanguage();
 
   const isSimplifiedChinese = chineseScript === 'simplified';
@@ -21,7 +21,9 @@ export default function SettingsPanel() {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
-        <Button>Open Settings</Button>
+        <Button flex={1} backgroundColor="brand.primaryAccent">
+          Settings
+        </Button>
       </Dialog.Trigger>
 
       <Portal>
@@ -74,4 +76,6 @@ export default function SettingsPanel() {
       </Portal>
     </Dialog.Root>
   );
-}
+};
+
+export default SettingsModal;

@@ -28,10 +28,12 @@ import {
 // Components
 import Artist from '@/components/Artist/artist';
 import Title from '@/components/Title/title';
+import RequestModal from '@/components/RequestModal/requestModal';
 import StatNumbers from '@/components/StatNumbers/statNumbers';
-import SettingsPanel from '@/components/SettingsPanel/settingsPanel';
+import SettingsModal from '@/components/SettingsModal/settingsModal';
 
 // Utils
+import { traditionalToSimplified } from '@/utils/canonicalizeName';
 import { getUserInfo } from '@/utils/userData';
 
 // Types
@@ -39,7 +41,6 @@ import {
   artistAlbumContainerMapType,
   artistAlbumTopAlbum,
 } from '@/types/Music';
-import RequestModal from '@/components/RequestModal/requestModal';
 
 // Constants
 const PAGE_SIZE = 100;
@@ -191,7 +192,17 @@ const HomeClient = () => {
               const rawTags = expandedTagMap[artist.name] || [];
 
               // Deduplicated + includes inherited tags
-              const searchBlob = [...new Set([...rawTags, artist.name])]
+              // Build searchable terms
+              const searchTerms = new Set<string>([...rawTags, artist.name]);
+
+              if (!artist.ignoreChinese) {
+                const traditionalName = traditionalToSimplified(artist.name);
+
+                searchTerms.add(traditionalName);
+              }
+
+              // Deduplicated + includes inherited tags + Chinese variants
+              const searchBlob = Array.from(searchTerms)
                 .join(' ')
                 .toLowerCase();
 
@@ -351,18 +362,21 @@ const HomeClient = () => {
                     {...inputStyles}
                   />
                 </Stack>
-                <SettingsPanel />
               </Heading>
-              <RequestModal
-                defaultUser={submittedUser || undefined}
-                artistsList={Object.keys(artists)}
-                artistAlbumsMap={Object.fromEntries(
-                  Object.entries(artistAlbums).map(([k, v]) => [
-                    k,
-                    Object.keys(v.albums),
-                  ]),
-                )}
-              />
+
+              <HStack width="100%">
+                <SettingsModal />
+                <RequestModal
+                  defaultUser={submittedUser || undefined}
+                  artistsList={Object.keys(artists)}
+                  artistAlbumsMap={Object.fromEntries(
+                    Object.entries(artistAlbums).map(([k, v]) => [
+                      k,
+                      Object.keys(v.albums),
+                    ]),
+                  )}
+                />
+              </HStack>
 
               <Accordion.Root
                 collapsible
