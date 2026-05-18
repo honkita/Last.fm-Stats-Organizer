@@ -104,7 +104,7 @@ const mergeArtists = async (
       return {
         id: artist.id,
         name: artist.name,
-        ignoreChinese: artist?.ignoreChineseCanonization,
+        ignoreChinese: artist.ignoreChineseCanonization,
         nameNorm,
         combinedAliasNorm,
       };
@@ -177,7 +177,8 @@ const mergeArtists = async (
       merged[mainName] = {
         playcount: 0,
         albums: {},
-        ignoreChinese: false,
+        ignoreChinese:
+          dbArtistMap[mainName]?.ignoreChineseCanonization ?? false,
         id: dbArtistMap[mainName]?.id || -1,
       };
 
@@ -595,6 +596,11 @@ export const getUserInfo = async (
     );
 
     const bestAlbum = await getBestAlbum(splitArtistList);
+
+    console.log(
+      'FUCKING BS ',
+      splitArtistList['林俊杰 (JJ Lin)'].ignoreChinese,
+    );
 
     return {
       'Best Albums': bestAlbum,

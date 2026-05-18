@@ -4,6 +4,9 @@ import { ChakraUIProvider } from '@/components/ui/provider';
 // Chakra UI Snippets
 import { Toaster } from '@/components/ui/toaster';
 
+// Contexts
+import { LanguageProvider } from '@/contexts/LanguageContext';
+
 // CSS
 import './globals.css';
 
@@ -12,8 +15,10 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
     <html lang="en">
       <body>
         <ChakraUIProvider>
-          {children}
-          <Toaster />
+          <LanguageProvider>
+            {children}
+            <Toaster />
+          </LanguageProvider>
         </ChakraUIProvider>
       </body>
     </html>

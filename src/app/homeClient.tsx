@@ -29,6 +29,7 @@ import {
 import Artist from '@/components/Artist/artist';
 import Title from '@/components/Title/title';
 import StatNumbers from '@/components/StatNumbers/statNumbers';
+import SettingsPanel from '@/components/SettingsPanel/settingsPanel';
 
 // Utils
 import { getUserInfo } from '@/utils/userData';
@@ -350,6 +351,7 @@ const HomeClient = () => {
                     {...inputStyles}
                   />
                 </Stack>
+                <SettingsPanel />
               </Heading>
               <RequestModal
                 defaultUser={submittedUser || undefined}
@@ -378,6 +380,7 @@ const HomeClient = () => {
                       artist={artist}
                       artistAlbums={artistAlbums}
                       rank={rank}
+                      ignoreChineseConversion={artist.ignoreChinese}
                     />
                   );
                 })}
