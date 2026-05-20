@@ -33,7 +33,7 @@ import StatNumbers from '@/components/StatNumbers/statNumbers';
 import SettingsModal from '@/components/SettingsModal/settingsModal';
 
 // Utils
-import { traditionalToSimplified } from '@/utils/canonicalizeName';
+import { simplifiedToTraditional } from '@/utils/canonicalizeName';
 import { getUserInfo } from '@/utils/userData';
 
 // Types
@@ -196,7 +196,7 @@ const HomeClient = () => {
               const searchTerms = new Set<string>([...rawTags, artist.name]);
 
               if (!artist.ignoreChinese) {
-                const traditionalName = traditionalToSimplified(artist.name);
+                const traditionalName = simplifiedToTraditional(artist.name);
 
                 searchTerms.add(traditionalName);
               }
