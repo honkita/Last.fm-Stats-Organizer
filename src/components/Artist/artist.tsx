@@ -3,6 +3,7 @@ import { Accordion, HStack, Text, VStack } from '@chakra-ui/react';
 
 // Components
 import ArtistName from '@/components/Artist/artistName';
+import Album from '@/components/Album/album';
 import Emoji from '@/components/Emoji/emoji';
 
 // Types
@@ -65,16 +66,15 @@ const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
           {albumEntries
             .sort((a, b) => b[1].playcount - a[1].playcount)
             .map(([albumName, album]) => (
-              <HStack
-                key={albumName}
-                justify="space-between"
-                fontSize="sm"
-                align="start"
-              >
-                <Text width="80%">{albumName}</Text>
-                <Text color="gray.500" width="20%" textAlign="right">
-                  {album.playcount.toLocaleString()} <Emoji text="🎧" />
-                </Text>
+              <HStack key={albumName} justify="space-between" fontSize="sm">
+                <Text flex="1">{albumName}</Text>
+
+                <HStack gap={1}>
+                  <Text color="gray.500">
+                    {album.playcount.toLocaleString()}
+                  </Text>
+                  <Album albumImage={album.image} />
+                </HStack>
               </HStack>
             ))}
         </VStack>

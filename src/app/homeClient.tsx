@@ -345,7 +345,10 @@ const HomeClient = () => {
                   <Input
                     placeholder="Search artist..."
                     value={artistSearch}
-                    onChange={(e) => setArtistSearch(e.target.value)}
+                    onChange={(e) => {
+                      setArtistSearch(e.target.value);
+                      setCurrentPage(1);
+                    }}
                     width={{ base: '100%', md: '100%' }}
                     {...inputStyles}
                   />
