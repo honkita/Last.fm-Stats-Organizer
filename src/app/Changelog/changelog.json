@@ -3,10 +3,8 @@
     "version": "2.6.0",
     "date": "2026-07-22",
     "changes": {
-      "added": [
-        "Added a new image feature for each album. May be reverted if it causes performance issues.x"
-      ],
-      "improved": [],
+      "added": ["Added a new image feature for each album."],
+      "improved": ["Improved load efficiency for images."],
       "fixed": []
     }
   },

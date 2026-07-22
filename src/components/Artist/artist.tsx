@@ -1,5 +1,17 @@
+// React
+import { useMemo, useState } from 'react';
+
 // Chakra UI
-import { Accordion, HStack, Text, VStack } from '@chakra-ui/react';
+import {
+  Accordion,
+  CloseButton,
+  Dialog,
+  HStack,
+  Image,
+  Portal,
+  Text,
+  VStack,
+} from '@chakra-ui/react';
 
 // Components
 import ArtistName from '@/components/Artist/artistName';
@@ -17,11 +29,22 @@ interface ArtistProps {
 }
 
 const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
+  const [selectedImage, setSelectedImage] = useState('');
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
   const name = artist.name;
   const albumData: artistAlbumContainer = artistAlbums[name];
+
+  const albumEntries = useMemo(
+    () =>
+      Object.entries(albumData?.albums ?? {}).sort(
+        (a, b) => b[1].playcount - a[1].playcount,
+      ),
+    [albumData],
+  );
+
   if (!albumData) return null;
 
-  const albumEntries = Object.entries(albumData.albums);
   const albumCount = albumEntries.length;
 
   // DEBUG
@@ -62,21 +85,74 @@ const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
       </Accordion.ItemTrigger>
 
       <Accordion.ItemContent>
-        <VStack align="stretch" gap={2} pt={2}>
+        <VStack align="stretch" gap={0} pt={2}>
           {albumEntries
             .sort((a, b) => b[1].playcount - a[1].playcount)
             .map(([albumName, album]) => (
-              <HStack key={albumName} justify="space-between" fontSize="sm">
+              <HStack
+                key={albumName}
+                justify="space-between"
+                fontSize="sm"
+                minH="24px"
+                lineHeight="1"
+              >
                 <Text flex="1">{albumName}</Text>
 
-                <HStack gap={1}>
+                <HStack gap={2}>
                   <Text color="gray.500">
                     {album.playcount.toLocaleString()}
                   </Text>
-                  <Album albumImage={album.image} />
+                  <Album
+                    albumImage={album.image}
+                    onOpen={(image) => {
+                      setSelectedImage(image);
+                      setPopoverOpen(true);
+                    }}
+                  />
                 </HStack>
               </HStack>
             ))}
+          <Dialog.Root
+            open={popoverOpen}
+            onOpenChange={(e) => setPopoverOpen(e.open)}
+          >
+            <Portal>
+              <Dialog.Backdrop />
+              <Dialog.Positioner>
+                <Dialog.Content
+                  width="fit-content"
+                  maxW="fit-content"
+                  maxH="80vh"
+                  overflow="auto"
+                  borderRadius="md"
+                  bg="white"
+                >
+                  <HStack justify="flex-end" mb={2}>
+                    <CloseButton
+                      onClick={() => setPopoverOpen(false)}
+                      aria-label="Close image dialog"
+                      width="40px"
+                      height="40px"
+                      minWidth="40px"
+                      minHeight="40px"
+                      borderRadius="md"
+                    />
+                  </HStack>
+                  <Dialog.Body p={2}>
+                    {selectedImage && (
+                      <Image
+                        src={selectedImage}
+                        alt="Album Image"
+                        maxH="80vh"
+                        maxW="100%"
+                        objectFit="contain"
+                      />
+                    )}
+                  </Dialog.Body>
+                </Dialog.Content>
+              </Dialog.Positioner>
+            </Portal>
+          </Dialog.Root>
         </VStack>
       </Accordion.ItemContent>
     </Accordion.Item>
