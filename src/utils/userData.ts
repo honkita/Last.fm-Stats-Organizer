@@ -282,10 +282,7 @@ const albumNormalization = async (
       const finalName =
         targetName || nonNormalizedAlbumNames[albumKey] || albumKey;
 
-      if (finalName === 'half') {
-        console.log(finalName, albumData.image);
-      }
-
+      // 5. Merge album data
       updatedAlbums[finalName] = {
         playcount:
           (updatedAlbums[finalName]?.playcount ?? 0) + albumData.playcount,
