@@ -144,7 +144,8 @@ const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
                         src={selectedImage}
                         alt="Album Image"
                         maxH="80vh"
-                        maxW="100%"
+                        maxW="30vw"
+                        minW="30vw"
                         objectFit="contain"
                       />
                     )}

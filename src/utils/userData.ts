@@ -282,10 +282,19 @@ const albumNormalization = async (
       const finalName =
         targetName || nonNormalizedAlbumNames[albumKey] || albumKey;
 
+      if (finalName === 'half') {
+        console.log(finalName, albumData.image);
+      }
+
       updatedAlbums[finalName] = {
         playcount:
           (updatedAlbums[finalName]?.playcount ?? 0) + albumData.playcount,
-        image: updatedAlbums[finalName]?.image || albumData.image,
+        image:
+          albumData.image === ''
+            ? updatedAlbums[finalName]?.image
+            : albumData.image.includes('2a96cbd8b46e442fc41c2b86b821562f')
+              ? updatedAlbums[finalName]?.image
+              : albumData.image,
       };
     }
 
@@ -308,7 +317,6 @@ const splitArtists = async (
   sameNameMap: Record<string, Record<string, string[]>>,
 ): Promise<artistAlbumContainerMapType> => {
   for (const [originalName, data] of Object.entries(sameNameMap)) {
-    console.log(data);
     const baseData = mergedNormalized[originalName];
     if (!baseData) {
       // If no albums exist for the original artist, just remove it and skip

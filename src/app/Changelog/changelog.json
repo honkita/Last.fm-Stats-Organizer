@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.6.1",
+    "date": "2026-07-25",
+    "changes": {
+      "added": [],
+      "improved": [
+        "Added a placeholder image for the albums that don't have an image or have not loaded them in yet.",
+        "Improved loading speeds."
+      ],
+      "fixed": ["Fixed a bugs where album images would not show up."]
+    }
+  },
+  {
     "version": "2.6.0",
     "date": "2026-07-22",
     "changes": {
