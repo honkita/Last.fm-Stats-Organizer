@@ -1,5 +1,17 @@
 [
   {
+    "version": "2.6.2",
+    "date": "2026-07-25",
+    "changes": {
+      "added": [],
+      "improved": [
+        "Added a loading animation for the album art",
+        "Album art sizes are responsive to screen and smaller devices will have a larger image."
+      ],
+      "fixed": []
+    }
+  },
+  {
     "version": "2.6.1",
     "date": "2026-07-25",
     "changes": {

@@ -244,7 +244,7 @@ const albumNormalization = async (
       if (aliasMap[albumKey]) {
         targetName = aliasMap[albumKey];
       } else {
-        // 2. Levenshtein fallback ONLY if no alias matc
+        // 2. Levenshtein fallback ONLY if no alias match
 
         const DISTANCE_THRESHOLD = 3;
         const SIMILARITY_THRESHOLD = 0.82; // tune: 0.8–0.9 typical

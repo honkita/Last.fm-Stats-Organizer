@@ -6,11 +6,13 @@ import {
   Accordion,
   CloseButton,
   Dialog,
+  Box,
   HStack,
   Image,
   Portal,
   Text,
   VStack,
+  Spinner,
 } from '@chakra-ui/react';
 
 // Components
@@ -31,6 +33,7 @@ interface ArtistProps {
 const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
   const [selectedImage, setSelectedImage] = useState('');
   const [popoverOpen, setPopoverOpen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const name = artist.name;
   const albumData: artistAlbumContainer = artistAlbums[name];
@@ -105,6 +108,7 @@ const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
                   <Album
                     albumImage={album.image}
                     onOpen={(image) => {
+                      setImageLoaded(false);
                       setSelectedImage(image);
                       setPopoverOpen(true);
                     }}
@@ -139,16 +143,36 @@ const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
                     />
                   </HStack>
                   <Dialog.Body p={2}>
-                    {selectedImage && (
-                      <Image
-                        src={selectedImage}
-                        alt="Album Image"
-                        maxH="80vh"
-                        maxW="30vw"
-                        minW="30vw"
-                        objectFit="contain"
-                      />
-                    )}
+                    <Box
+                      width={{ base: '70vw', md: '30vw' }}
+                      height={{ base: '70vw', md: '30vw' }}
+                      maxWidth={{ base: '70vw', md: '30vw' }}
+                      maxHeight={{ base: '70vw', md: '30vw' }}
+                      minWidth={{ base: '70vw', md: '30vw' }}
+                      position="relative"
+                      display="flex"
+                      alignItems="center"
+                      justifyContent="center"
+                      overflow="hidden"
+                    >
+                      {!imageLoaded && (
+                        <Spinner size="xl" position="absolute" />
+                      )}
+
+                      {selectedImage && (
+                        <Image
+                          src={selectedImage}
+                          alt="Album Image"
+                          maxH="100%"
+                          maxW="100%"
+                          objectFit="contain"
+                          opacity={imageLoaded ? 1 : 0}
+                          transition="opacity 0.2s"
+                          onLoad={() => setImageLoaded(true)}
+                          onError={() => setImageLoaded(true)}
+                        />
+                      )}
+                    </Box>
                   </Dialog.Body>
                 </Dialog.Content>
               </Dialog.Positioner>
