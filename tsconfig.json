@@ -2,12 +2,11 @@
   "compilerOptions": {
     "target": "ESNext",
     "module": "ESNext",
-    "baseUrl": ".",
     "moduleResolution": "Bundler",
     "skipLibCheck": true,
     "paths": {
-      "@/*": ["src/*"],
-      "@/assets/*": ["public/Assets/*"]
+      "@/*": ["./src/*"],
+      "@/assets/*": ["./public/Assets/*"]
     },
     "jsx": "react-jsx",
     "incremental": true,

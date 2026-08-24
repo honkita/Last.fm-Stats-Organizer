@@ -180,10 +180,10 @@ export const normalizeAlbumFull = (name: string): string => {
         /\s*\((Standard|Video|Deluxe|Expanded|Special|Complete|Platinum|Unmixed Extended|Analog)(\s*(Edition|Version|Ver|Versions\.?))?\)/gi,
         '',
       )
-      .replace(
-        /\s*-\s*([^-()]+?)\s*(version|ver|versions?)\.?\s*-?$/i,
-        (_, type) => ` (${capitalize(type)} Ver.)`,
-      )
+      // .replace(
+      //   /\s*-\s*([^-()]+?)\s*(version|ver|versions?)\.?\s*-?$/i,
+      //   (_, type) => ` (${capitalize(type)} Ver.)`,
+      // )
       .replace(/\s*-\s*(?:EP|Single)$/i, '')
       .replace(/\s+(?:EP)$/i, '')
       .trim(),
