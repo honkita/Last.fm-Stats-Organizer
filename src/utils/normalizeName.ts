@@ -1,6 +1,3 @@
-// Lib
-import { capitalize } from '@/lib/capitalize';
-
 // Utils
 import { canonicalizeName } from '@/utils/canonicalizeName';
 

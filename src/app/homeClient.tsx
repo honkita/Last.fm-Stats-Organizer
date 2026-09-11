@@ -30,6 +30,9 @@ import Artist from '@/components/Artist/artist';
 import Title from '@/components/Title/title';
 import StatNumbers from '@/components/StatNumbers/statNumbers';
 
+// Lib
+// import { getArtistTags } from '@/lib/api';
+
 // Utils
 import { getUserInfo } from '@/utils/userData';
 
@@ -113,7 +116,9 @@ const HomeClient = () => {
       }
 
       // Fetch tags + hierarchy
-      const tagRes = await fetch('/api/ArtistTags');
+      const tagRes = await fetch(
+        `${process.env.NEXT_PUBLIC_LASTFM_API_URL}/api/ArtistTags`,
+      );
       if (!tagRes.ok) throw new Error('Failed to fetch artist tags');
 
       const {
