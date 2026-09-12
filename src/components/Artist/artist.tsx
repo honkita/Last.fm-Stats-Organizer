@@ -146,9 +146,6 @@ const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
                     <Box
                       width={{ base: '70vw', md: '30vw' }}
                       height={{ base: '70vw', md: '30vw' }}
-                      maxWidth={{ base: '70vw', md: '30vw' }}
-                      maxHeight={{ base: '70vw', md: '30vw' }}
-                      minWidth={{ base: '70vw', md: '30vw' }}
                       position="relative"
                       display="flex"
                       alignItems="center"
@@ -163,8 +160,8 @@ const Artist = ({ rank, artist, artistAlbums }: ArtistProps) => {
                         <Image
                           src={selectedImage}
                           alt="Album Image"
-                          maxH="100%"
-                          maxW="100%"
+                          width="100%"
+                          height="100%"
                           objectFit="contain"
                           opacity={imageLoaded ? 1 : 0}
                           transition="opacity 0.2s"

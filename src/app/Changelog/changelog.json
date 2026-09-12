@@ -1,5 +1,14 @@
 [
   {
+    "version": "2.7",
+    "date": "2026-9-11",
+    "changes": {
+      "added": [],
+      "improved": ["Changed the API and uses an external one for Supabase."],
+      "fixed": ["Fixed image size for album art."]
+    }
+  },
+  {
     "version": "2.6.2",
     "date": "2026-07-25",
     "changes": {
